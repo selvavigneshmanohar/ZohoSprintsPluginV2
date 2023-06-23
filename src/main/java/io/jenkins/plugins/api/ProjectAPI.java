@@ -2,6 +2,8 @@ package io.jenkins.plugins.api;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import hudson.model.Run;
 import hudson.model.TaskListener;
@@ -11,6 +13,7 @@ import io.jenkins.plugins.util.Util;
 import static io.jenkins.plugins.util.Util.sprintsLogparser;
 
 public final class ProjectAPI {
+    private static final Logger LOGGER = Logger.getLogger(ProjectAPI.class.getName());
     private String feed;
     private Integer projectNumber;
     private Run<?, ?> build;
@@ -18,7 +21,7 @@ public final class ProjectAPI {
 
     public ProjectAPI(String prefix, String feed, Run<?, ?> build, TaskListener listener) {
         Matcher matcher = Util.ZS_PROJECT.matcher(prefix);
-        this.projectNumber = matcher.find() ? Integer.parseInt(matcher.group(2)) : null;
+        this.projectNumber = matcher.matches() ? Integer.parseInt(matcher.group(2)) : null;
         this.feed = feed;
         this.build = build;
         this.listener = listener;
@@ -36,11 +39,12 @@ public final class ProjectAPI {
             OAuthClient client = new OAuthClient(url, RequestClient.METHOD_POST, param, listener, build);
             if (client.execute() != null) {
                 listener.getLogger().println(sprintsLogparser("Feed status successfully added", false));
+                return Boolean.TRUE;
             }
-            return Boolean.TRUE;
-        } catch (Exception e) {
-            return Boolean.FALSE;
-        }
 
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Error", e);
+        }
+        return Boolean.FALSE;
     }
 }

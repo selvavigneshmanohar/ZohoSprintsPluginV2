@@ -71,13 +71,14 @@ public class AddWorkItem extends Recorder implements MatrixAggregatable {
 
     @DataBoundConstructor
     public AddWorkItem(String prefix, String name, String description, String status, String type, String priority,
-            String duration, String startdate, String enddate, String customFields) {
+            String duration, String assignee, String startdate, String enddate, String customFields) {
         this.prefix = prefix;
         this.name = name;
         this.description = description;
         this.status = status;
         this.type = type;
         this.priority = priority;
+        this.assignee = assignee;
         this.duration = duration;
         this.startdate = startdate;
         this.enddate = enddate;
@@ -99,7 +100,7 @@ public class AddWorkItem extends Recorder implements MatrixAggregatable {
                 .withName(name)
                 .withDescription(description)
                 .withStatus(status)
-                .withPrefix(priority)
+                .withPriority(priority)
                 .withType(type)
                 .withDuration(duration)
                 .withComment(startdate)

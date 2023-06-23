@@ -106,7 +106,7 @@ public class AddWorkItem extends Step {
     }
 
     public static class AddWorkItemExecutor extends SynchronousNonBlockingStepExecution<Void> {
-
+        private static final long serialVersionUID = 4L;
         private final transient AddWorkItem step;
 
         protected AddWorkItemExecutor(AddWorkItem step, @Nonnull StepContext context) {
@@ -121,7 +121,7 @@ public class AddWorkItem extends Step {
                     .withName(step.name)
                     .withDescription(step.description)
                     .withStatus(step.status)
-                    .withPrefix(step.priority)
+                    .withPriority(step.priority)
                     .withType(step.type)
                     .withDuration(step.duration)
                     .withComment(step.startdate)

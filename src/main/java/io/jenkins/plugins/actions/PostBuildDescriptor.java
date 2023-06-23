@@ -3,14 +3,12 @@ package io.jenkins.plugins.actions;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
-import hudson.Extension;
 import hudson.model.AbstractProject;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Publisher;
 import hudson.util.FormValidation;
 import net.sf.json.JSONObject;
 
-@Extension
 public class PostBuildDescriptor extends BuildStepDescriptor<Publisher> {
 
     @Override

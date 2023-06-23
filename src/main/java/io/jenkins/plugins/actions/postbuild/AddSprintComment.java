@@ -8,6 +8,7 @@ import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
+import hudson.Extension;
 import hudson.Launcher;
 import hudson.matrix.MatrixAggregatable;
 import hudson.matrix.MatrixAggregator;
@@ -77,6 +78,7 @@ public class AddSprintComment extends Recorder implements MatrixAggregatable {
         return (DescriptorImpl) super.getDescriptor();
     }
 
+    @Extension
     public static class DescriptorImpl extends PostBuildDescriptor {
 
         public FormValidation doCheckNote(@QueryParameter final String note) {

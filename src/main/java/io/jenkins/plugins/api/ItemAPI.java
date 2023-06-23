@@ -1,26 +1,33 @@
 package io.jenkins.plugins.api;
 
+import static io.jenkins.plugins.util.Util.getZSUserIds;
+import static io.jenkins.plugins.util.Util.replaceEnvVaribaleToValue;
+import static io.jenkins.plugins.util.Util.sprintsLogparser;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import javax.annotation.Nonnull;
 
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import io.jenkins.plugins.sprints.OAuthClient;
 import io.jenkins.plugins.sprints.RequestClient;
-import static io.jenkins.plugins.util.Util.sprintsLogparser;
-import static io.jenkins.plugins.util.Util.replaceEnvVaribaleToValue;
-import static io.jenkins.plugins.util.Util.getZSUserIds;
-import static org.apache.commons.lang.StringUtils.isEmpty;
+import io.jenkins.plugins.util.Util;
+import net.sf.json.JSONArray;
 
 public final class ItemAPI {
+    private static final Logger LOGGER = Logger.getLogger(ItemAPI.class.getName());
     public static final Pattern ZS_ADD_ITEM = Pattern.compile("^(P|p)([0-9]+)#(s|S)([0-9]+)$");
     public static final Pattern ZS_ITEM = Pattern.compile("^(P|p)([0-9]+)#(s|S)([0-9]+)#(i|I)([0-9]+)$");
     private String comment, name, description, status, type, priority, duration, startdate, enddate, customFields,
             assignee;
+    private JSONArray zsuids = null;
     private TaskListener listener;
     private Run<?, ?> build;
     private Integer projectNumber, sprintNumber, itemNumber;
@@ -50,7 +57,7 @@ public final class ItemAPI {
             listener.error("Invalid Prefix");
             return result;
         }
-        String url = String.format("/projects/no-%s/sprints/no-%s/item/no-%s/", projectNumber, sprintNumber,
+        String url = String.format("/projects/no-%s/sprints/no-%s/item/no-%s/notes/", projectNumber, sprintNumber,
                 itemNumber);
         Map<String, Object> param = new HashMap<>();
         param.put("name", comment);
@@ -61,6 +68,7 @@ public final class ItemAPI {
                 result = Boolean.TRUE;
             }
         } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Error at add Work Item Comment", e);
         }
         return result;
 
@@ -74,8 +82,9 @@ public final class ItemAPI {
         }
         if (assignee != null) {
             try {
-                this.assignee = getZSUserIds(projectNumber, assignee, build, listener);
+                this.zsuids = getZSUserIds(projectNumber, assignee, build, listener);
             } catch (Exception e) {
+                LOGGER.log(Level.WARNING, "", e);
                 listener.error("Error occure while fetching assignees");
                 return result;
             }
@@ -96,7 +105,7 @@ public final class ItemAPI {
 
     private boolean execute(String action, String url) {
         Map<String, Object> param = new HashMap<>();
-        boolean isupdate = action.equals("additem");
+        boolean isupdate = itemNumber != null;
         param.put("action", action);
         param.put("name", name);
         param.put("projitemtypename", type);
@@ -106,35 +115,32 @@ public final class ItemAPI {
         param.put("enddate", enddate);
         param.put("priorityname", priority);
         param.put("statusname", status);
-        param.put("users", assignee == null ? assignee : assignee.split(","));
-        if (!isEmpty(customFields)) {
-            String[] fields = customFields.split("\n");
-            for (String field : fields) {
-                String[] fieldArr = field.split("=");
-                param.put(fieldArr[0], fieldArr[1]);
-            }
-        }
+        param.put("users", zsuids);
+        Util.setCustomFields(customFields, null, param);
         try {
             OAuthClient client = new OAuthClient(url, RequestClient.METHOD_POST, param, listener, build);
-            if (client.execute() != null) {
+            String response = client.execute();
+            if (response != null) {
                 listener.getLogger()
                         .println(sprintsLogparser(isupdate ? "Item fields are updated" : "Item has been added", false));
                 return Boolean.TRUE;
             }
         } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "", e);
         }
 
         return Boolean.FALSE;
     }
 
     public static class ItemActionBuilder {
-        private String comment, name, description, status, type, priority, duration, startdate, enddate, customFields,
-                prefix, assignee;
+        private String comment = null, name = null, description = null, status = null, type = null, priority = null,
+                duration = null, startdate = null, enddate = null, customFields = null,
+                prefix = null, assignee = null;
 
         private Integer projectNumber, itemNumber, sprintNumber;
         private Run<?, ?> build;
         private TaskListener listener;
-        public static final Pattern ZS_ITEM = Pattern.compile("^(P|p)([0-9]+)#(s|S)([0-9]+)(#(i|I)([0-9]+))?$");
+        public static final Pattern ZS_ITEM = Pattern.compile("^(P|p)([0-9]+)#(s|S)([0-9]+)(#(i|I)([0-9]+))?");
 
         public ItemActionBuilder(@Nonnull String prefix, Run<?, ?> build, TaskListener listener)
                 throws IOException, InterruptedException {
@@ -216,13 +222,14 @@ public final class ItemAPI {
 
         public ItemAPI build() {
             Matcher matcher = ZS_ITEM.matcher(prefix);
-            if (matcher.find()) {
+            if (matcher.matches()) {
                 this.projectNumber = Integer.parseInt(matcher.group(2));
                 this.sprintNumber = Integer.parseInt(matcher.group(4));
-                this.itemNumber = Integer.parseInt(matcher.group(7));
+                this.itemNumber = matcher.group(7) != null ? Integer.parseInt(matcher.group(7)) : null;
             }
             return new ItemAPI(this);
         }
 
     }
+
 }

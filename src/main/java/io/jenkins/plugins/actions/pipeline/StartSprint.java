@@ -56,7 +56,7 @@ public class StartSprint extends Step {
     }
 
     public static class StartSprintExecutor extends SynchronousNonBlockingStepExecution<Void> {
-
+        private static final long serialVersionUID = 7L;
         private final transient StartSprint step;
 
         protected StartSprintExecutor(StartSprint step, @Nonnull StepContext context) {

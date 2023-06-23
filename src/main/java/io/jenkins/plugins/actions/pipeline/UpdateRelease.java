@@ -90,7 +90,7 @@ public class UpdateRelease extends Step {
     }
 
     public static class UpdateReleaseExecutor extends SynchronousNonBlockingStepExecution<Void> {
-
+        private static final long serialVersionUID = 8L;
         private final transient UpdateRelease step;
 
         protected UpdateReleaseExecutor(UpdateRelease step, @Nonnull StepContext context) {

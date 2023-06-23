@@ -6,6 +6,7 @@ import javax.annotation.Nonnull;
 
 import org.kohsuke.stapler.DataBoundConstructor;
 
+import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
@@ -36,6 +37,7 @@ public class StartSprint extends Builder {
         return (DescriptorImpl) super.getDescriptor();
     }
 
+    @Extension
     public static class DescriptorImpl extends BuildStepDescriptorImpl {
 
         @Nonnull

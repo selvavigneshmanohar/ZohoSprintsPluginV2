@@ -1,20 +1,27 @@
 package io.jenkins.plugins.api;
 
+import static io.jenkins.plugins.util.Util.getZSUserIds;
+import static io.jenkins.plugins.util.Util.replaceEnvVaribaleToValue;
+import static io.jenkins.plugins.util.Util.sprintsLogparser;
+
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import io.jenkins.plugins.sprints.OAuthClient;
 import io.jenkins.plugins.sprints.RequestClient;
+import io.jenkins.plugins.util.Util;
+import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
-import static io.jenkins.plugins.util.Util.getZSUserIds;
-import static io.jenkins.plugins.util.Util.replaceEnvVaribaleToValue;
-import static io.jenkins.plugins.util.Util.sprintsLogparser;
-import static org.apache.commons.lang.StringUtils.isEmpty;
 
 public final class ReleaseAPI {
+    private static final Logger LOGGER = Logger.getLogger(ReleaseAPI.class.getName());
     private String api, name, owners, goal, stage, startdate, enddate, customFields;
+    private JSONArray ownerIds = null;
     private Integer projectNumber, releaseNumber;
     private Run<?, ?> build;
     private TaskListener listener;
@@ -33,7 +40,7 @@ public final class ReleaseAPI {
         this.listener = builder.listener;
         this.api = String.format("/projects/no-%s/release/", builder.projectNumber);
         if (builder.releaseNumber != null) {
-            this.api += String.format("no-%s/update/", builder.releaseNumber);
+            this.api += String.format("%sno-%s/update/", this.api, builder.releaseNumber);
         }
 
     }
@@ -50,7 +57,7 @@ public final class ReleaseAPI {
         }
         if (owners != null) {
             try {
-                this.owners = getZSUserIds(projectNumber, owners, build, listener);
+                this.ownerIds = getZSUserIds(projectNumber, envReplacer(owners), build, listener);
             } catch (Exception e) {
                 listener.error("Error occure while fetching assignees");
                 return result;
@@ -62,54 +69,55 @@ public final class ReleaseAPI {
         param.put("enddate", envReplacer(enddate));
         param.put("statusName", envReplacer(stage));
         param.put("goal", envReplacer(goal));
-        param.put("ownerIds", owners == null ? owners : owners.split(","));
-        setCustomParam(param);
-        try {
-            OAuthClient client = new OAuthClient(api, RequestClient.METHOD_POST, param, listener, build);
-            if (client.execute() != null) {
-                listener.getLogger().println(sprintsLogparser("Release has been added", false));
-                result = Boolean.TRUE;
-            }
-        } catch (Exception e) {
-        }
+        param.put("ownerIds", (ownerIds == null | ownerIds.isEmpty()) ? null : ownerIds);
+        return execute(param);
+    }
 
-        return result;
+    private boolean emptyCheck(String value) {
+        return value != null && value.length() > 0;
     }
 
     public boolean update() throws IOException, InterruptedException {
-        boolean result = Boolean.FALSE;
         if (projectNumber == null || releaseNumber == null) {
             listener.error("Invalid Prefix");
-            return result;
+            return Boolean.FALSE;
         }
         JSONObject param = new JSONObject();
-        param.put("name", envReplacer(name));
-        param.put("startdate", envReplacer(startdate));
-        param.put("enddate", envReplacer(enddate));
-        param.put("statusName", envReplacer(stage));
-        param.put("goal", envReplacer(goal));
-        setCustomParam(param);
+        if (emptyCheck(name)) {
+            param.put("name", envReplacer(name));
+        }
+        if (emptyCheck(startdate)) {
+            param.put("startdate", envReplacer(startdate));
+        }
+        if (emptyCheck(enddate)) {
+            param.put("enddate", envReplacer(enddate));
+        }
+        if (emptyCheck(stage)) {
+            param.put("statusName", envReplacer(stage));
+        }
+        if (emptyCheck(goal)) {
+            param.put("goal", envReplacer(goal));
+        }
+        if (ownerIds != null && !ownerIds.isEmpty()) {
+            param.put("ownerIds", ownerIds);
+        }
+
+        return execute(param);
+    }
+
+    private boolean execute(JSONObject param) throws IOException, InterruptedException {
+        Util.setCustomFields(customFields, param, null);
         try {
             OAuthClient client = new OAuthClient(api, RequestClient.METHOD_POST, param, listener, build);
             if (client.execute() != null) {
-                listener.getLogger().println(sprintsLogparser("Release has been updated", false));
-                result = Boolean.TRUE;
+                listener.getLogger().println(sprintsLogparser(
+                        releaseNumber != null ? "Release has been updated" : "Release has been added", false));
+                return Boolean.TRUE;
             }
         } catch (Exception e) {
-
+            LOGGER.log(Level.WARNING, "Error", e);
         }
-
-        return result;
-    }
-
-    private void setCustomParam(JSONObject param) {
-        if (!isEmpty(customFields)) {
-            String[] fields = customFields.split("\n");
-            for (String field : fields) {
-                String[] fieldArr = field.split("=");
-                param.put(fieldArr[0], fieldArr[1]);
-            }
-        }
+        return Boolean.FALSE;
     }
 
     public static class ReleaseAPIBuilder {
@@ -119,18 +127,23 @@ public final class ReleaseAPI {
         private TaskListener listener;
         public static final Pattern ZS_RELEASE = Pattern.compile("^(P|p)([0-9]+)(#(r|IR)([0-9]+))?$");
 
+        private String getEnvVaribaleToValue(String key) throws IOException, InterruptedException {
+            return replaceEnvVaribaleToValue(build, listener, key);
+        }
+
         public ReleaseAPIBuilder(String prefix, Run<?, ?> build, TaskListener listener)
                 throws IOException, InterruptedException {
-            withPrefix(replaceEnvVaribaleToValue(build, listener, prefix))
-                    .withListener(listener).withBuild(build);
+            withListener(listener).withBuild(build)
+                    .withPrefix(replaceEnvVaribaleToValue(build, listener, prefix));
+
         }
 
         public String getPrefix() {
             return prefix;
         }
 
-        public ReleaseAPIBuilder withPrefix(String prefix) {
-            this.prefix = prefix;
+        public ReleaseAPIBuilder withPrefix(String value) throws IOException, InterruptedException {
+            this.prefix = getEnvVaribaleToValue(value);
             return this;
         }
 
@@ -138,8 +151,8 @@ public final class ReleaseAPI {
             return name;
         }
 
-        public ReleaseAPIBuilder withName(String name) {
-            this.name = name;
+        public ReleaseAPIBuilder withName(String value) throws IOException, InterruptedException {
+            this.name = getEnvVaribaleToValue(value);
             return this;
         }
 
@@ -147,8 +160,8 @@ public final class ReleaseAPI {
             return owners;
         }
 
-        public ReleaseAPIBuilder withOwners(String owners) {
-            this.owners = owners;
+        public ReleaseAPIBuilder withOwners(String value) throws IOException, InterruptedException {
+            this.owners = getEnvVaribaleToValue(value);
             return this;
         }
 
@@ -156,8 +169,8 @@ public final class ReleaseAPI {
             return goal;
         }
 
-        public ReleaseAPIBuilder withGoal(String goal) {
-            this.goal = goal;
+        public ReleaseAPIBuilder withGoal(String value) throws IOException, InterruptedException {
+            this.goal = getEnvVaribaleToValue(value);
             return this;
         }
 
@@ -165,8 +178,8 @@ public final class ReleaseAPI {
             return stage;
         }
 
-        public ReleaseAPIBuilder withStage(String stage) {
-            this.stage = stage;
+        public ReleaseAPIBuilder withStage(String value) throws IOException, InterruptedException {
+            this.stage = getEnvVaribaleToValue(value);
             return this;
         }
 
@@ -174,8 +187,8 @@ public final class ReleaseAPI {
             return startdate;
         }
 
-        public ReleaseAPIBuilder withStartdate(String startdate) {
-            this.startdate = startdate;
+        public ReleaseAPIBuilder withStartdate(String value) throws IOException, InterruptedException {
+            this.startdate = getEnvVaribaleToValue(value);
             return this;
         }
 
@@ -183,8 +196,8 @@ public final class ReleaseAPI {
             return enddate;
         }
 
-        public ReleaseAPIBuilder withEnddate(String enddate) {
-            this.enddate = enddate;
+        public ReleaseAPIBuilder withEnddate(String value) throws IOException, InterruptedException {
+            this.enddate = getEnvVaribaleToValue(value);
             return this;
         }
 
@@ -192,8 +205,8 @@ public final class ReleaseAPI {
             return customFields;
         }
 
-        public ReleaseAPIBuilder withCustomFields(String customFields) {
-            this.customFields = customFields;
+        public ReleaseAPIBuilder withCustomFields(String value) throws IOException, InterruptedException {
+            this.customFields = getEnvVaribaleToValue(value);
             return this;
         }
 
@@ -201,18 +214,8 @@ public final class ReleaseAPI {
             return projectNumber;
         }
 
-        public ReleaseAPIBuilder withProjectNo(Integer projectNo) {
-            this.projectNumber = projectNo;
-            return this;
-        }
-
         public Integer getReleaseNo() {
             return releaseNumber;
-        }
-
-        public ReleaseAPIBuilder withReleaseNo(Integer releaseNo) {
-            this.releaseNumber = releaseNo;
-            return this;
         }
 
         public Run<?, ?> getBuild() {
@@ -235,7 +238,7 @@ public final class ReleaseAPI {
 
         public ReleaseAPI build() {
             Matcher matcher = ZS_RELEASE.matcher(prefix);
-            if (matcher.find()) {
+            if (matcher.matches()) {
                 this.projectNumber = Integer.parseInt(matcher.group(2));
                 this.releaseNumber = Integer.parseInt(matcher.group(4));
             }

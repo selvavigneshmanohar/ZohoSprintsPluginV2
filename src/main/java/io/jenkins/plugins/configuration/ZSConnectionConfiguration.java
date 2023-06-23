@@ -4,24 +4,20 @@ import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
 
 import hudson.Extension;
-import hudson.security.Permission;
 import hudson.util.Secret;
 import jenkins.model.GlobalConfiguration;
-import jenkins.model.Jenkins;
 
+@Restricted(NoExternalUse.class)
 @Extension
 public class ZSConnectionConfiguration extends GlobalConfiguration {
-
-    private String accountsDomain, serviceDomain, serviceAPIDomain, redirectURL, zoid;
-    private Secret clientId, clientSecret, refreshToken, zsheader, accessToken;
-    private Long accessTokenUpdatedTime = null;
+    private String accountsDomain, serviceDomain, serviceAPIDomain, redirectURL;
+    private Secret clientId, clientSecret, refreshToken, zsheader, accessToken, zoid;
 
     public ZSConnectionConfiguration() {
+        load();
     }
 
-    @Restricted(NoExternalUse.class)
     public ZSConnectionConfiguration(ZSConnection connection) {
-        Jenkins.getInstance().getACL().checkPermission(Permission.CONFIGURE);
         withAccountsDomain(connection.getAccountsDomain())
                 .withServiceDomain(connection.getServiceDomain())
                 .withServiceAPIDomain(connection.getServiceAPIDomain())
@@ -30,7 +26,7 @@ public class ZSConnectionConfiguration extends GlobalConfiguration {
                 .withClientId(connection.getClientId())
                 .withClientSecret(connection.getClientSecret())
                 .withRefreshToken(connection.getRefreshToken())
-                .withZsheader(connection.getRefreshToken());
+                .withZsheader(connection.getZSheader());
     }
 
     private Secret getSecret(String value) {
@@ -45,7 +41,7 @@ public class ZSConnectionConfiguration extends GlobalConfiguration {
         return getString(zsheader);
     }
 
-    public ZSConnectionConfiguration withZsheader(String zsheader) {
+    private ZSConnectionConfiguration withZsheader(String zsheader) {
         this.zsheader = getSecret(zsheader);
         return this;
     }
@@ -78,11 +74,11 @@ public class ZSConnectionConfiguration extends GlobalConfiguration {
     }
 
     public String getZoid() {
-        return zoid;
+        return getString(zoid);
     }
 
-    private ZSConnectionConfiguration withZoid(String zoid) {
-        this.zoid = zoid;
+    private ZSConnectionConfiguration withZoid(String value) {
+        this.zoid = getSecret(value);
         return this;
     }
 
@@ -128,14 +124,6 @@ public class ZSConnectionConfiguration extends GlobalConfiguration {
 
     public void setAccessToken(String value) {
         this.accessToken = getSecret(value);
-    }
-
-    public Long getAccessTokenUpdatedTime() {
-        return accessTokenUpdatedTime;
-    }
-
-    public void setAccessTokenUpdatedTime(Long accessTokenUpdatedTime) {
-        this.accessTokenUpdatedTime = accessTokenUpdatedTime;
     }
 
     public String getZSApiPath() {

@@ -6,6 +6,7 @@ import javax.annotation.Nonnull;
 
 import org.kohsuke.stapler.DataBoundConstructor;
 
+import hudson.Extension;
 import hudson.Launcher;
 import hudson.matrix.MatrixAggregatable;
 import hudson.matrix.MatrixAggregator;
@@ -69,6 +70,7 @@ public class StartSprint extends Recorder implements MatrixAggregatable {
         return (DescriptorImpl) super.getDescriptor();
     }
 
+    @Extension
     public static class DescriptorImpl extends PostBuildDescriptor {
         @Nonnull
         @Override

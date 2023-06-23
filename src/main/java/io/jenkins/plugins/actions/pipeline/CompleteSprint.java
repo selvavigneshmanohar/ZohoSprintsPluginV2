@@ -56,7 +56,7 @@ public class CompleteSprint extends Step {
     }
 
     public static class CompleteSprintExecutor extends SynchronousNonBlockingStepExecution<Void> {
-
+        private static final long serialVersionUID = 5L;
         private final transient CompleteSprint step;
 
         protected CompleteSprintExecutor(CompleteSprint step, @Nonnull StepContext context) {

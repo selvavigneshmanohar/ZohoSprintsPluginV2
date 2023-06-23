@@ -1,25 +1,22 @@
 package io.jenkins.plugins.util;
 
-import static org.apache.commons.lang.StringUtils.isEmpty;
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import hudson.ProxyConfiguration;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
-import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import io.jenkins.plugins.configuration.ZSConnectionConfiguration;
 import io.jenkins.plugins.sprints.OAuthClient;
 import io.jenkins.plugins.sprints.RequestClient;
 import jenkins.model.Jenkins;
+import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 /**
@@ -29,57 +26,16 @@ import net.sf.json.JSONObject;
 public class Util {
 
     private static final Logger LOGGER = Logger.getLogger(Util.class.getName());
-    public static final String SPRINTSANDITEMREGEX = "^P[0-9]+#(I|S)[0-9]+(:?,P[0-9]+#(I|S)[0-9]+)*$";
-    public static final String PROJECT_REGEX = "^P[0-9]+$";
-    public static final String RELEASE_REGEX = "^(P|p)([0-9]+)#(R|r)([0-9]+)$";
-    public static final String ADD_ITEM_REGEX = "^P[0-9]+#S[0-9]+(#R[0-9]+)?$";
-    public static final String ITEM_REGEX = "(^P[0-9]+#I[0-9]+(?:,P[0-9]+#I[0-9]+)*)$";
     private static final String PLUGIN_RESOUCE_PATH = "/plugin/zohosprints/";
-    public static final String MAIL_REGEX = "^([a-zA-Z0-9]([\\w\\-\\.\\+\\']*)@([\\w\\-\\.]*)(\\.[a-zA-Z]{2,20}(\\.[a-zA-Z]{2}){0,2}))$";
 
     public static final Pattern ZS_RELEASE = Pattern.compile("^(P|p)([0-9]+)#(R|r)([0-9]+)$");
     public static final Pattern ZS_SPRINT = Pattern.compile("^(P|p)([0-9]+)#(s|S)([0-9]+)$");
     public static final Pattern ZS_ITEM = Pattern.compile("^(P|p)([0-9]+)#(s|S)([0-9]+)#(i|I)([0-9]+)$");
     public static final Pattern ZS_PROJECT = Pattern.compile("^(P|p)([0-9]+)$");
 
-    private static boolean isMatch(Pattern pattern, String value) {
-        Matcher matcher = pattern.matcher(value);
-        return matcher.find();
-    }
-
-    public static boolean isItemRegex(String value) {
-        return isMatch(ZS_ITEM, value);
-    }
-
-    public static boolean isSprintRegex(String value) {
-        return isMatch(ZS_SPRINT, value);
-    }
-
-    /**
-     *
-     * @param build    Abstarct build Object of Build
-     * @param listener Listener of build
-     * @param key      key to be get original Value
-     * @return original value of the Key
-     */
-    public static String expandContent(final AbstractBuild<?, ?> build, final BuildListener listener,
-            final String key) {
-        String value = null;
-        try {
-            value = build.getEnvironment(listener).expand(key);
-            if (isEmpty(value)) {
-                throw new IllegalArgumentException("No Key " + key + " available");
-            }
-        } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "", e);
-            listener.finished(Result.FAILURE);
-        }
-        return value;
-    }
-
     public static String replaceEnvVaribaleToValue(final AbstractBuild<?, ?> build, final BuildListener listener,
             final String key) throws IOException, InterruptedException {
-        return build != null && listener != null ? build.getEnvironment(listener).expand(key) : key;
+        return build.getEnvironment(listener).expand(key);
     }
 
     public static String replaceEnvVaribaleToValue(Run<?, ?> run, final TaskListener listener,
@@ -120,44 +76,57 @@ public class Util {
         return getResourcePath() + "sprints.svg";
     }
 
-    /**
-     *
-     * @return true/false {is Proxy configured in Jenkins}
-     */
-    public static boolean isProxyConfigured() {
-        ProxyConfiguration proxy = Jenkins.getInstance().proxy;
-        if (proxy != null) {
-            return true;
-        }
-        return false;
-    }
-
-    public static String getZSUserIds(int projectNumber, String mailIds, Run<?, ?> build,
+    public static JSONArray getZSUserIds(int projectNumber, String mailIds, Run<?, ?> build,
             TaskListener listener)
             throws Exception {
         mailIds = replaceEnvVaribaleToValue(build, listener, mailIds);
         String api = String.format("/projects/no-%s/user/details/", projectNumber);
         Map<String, Object> param = new HashMap<>();
         param.put("action", "projectusers");
-        param.put("emailids", mailIds.split(","));
-        OAuthClient client = new OAuthClient(api, RequestClient.METHOD_POST, param, listener, build);
+        param.put("emailids", JSONArray.fromObject(mailIds.split(",")));
+        OAuthClient client = new OAuthClient(api, RequestClient.METHOD_GET, param, listener, build);
         String response = client.execute();
+        listener.getLogger().println(response);
         if (response != null) {
             JSONObject responseObj = JSONObject.fromObject(response);
             JSONObject userObj = responseObj.getJSONObject("userObj");
+
             Iterator<String> keys = userObj.keys();
-            StringBuilder mailIdBuilder = new StringBuilder();
+            Object[] users = new Object[userObj.size()];
+            int counter = 0;
             while (keys.hasNext()) {
                 String key = keys.next();
                 JSONObject value = JSONObject.fromObject(userObj.get(key));
-                mailIdBuilder = mailIdBuilder.append(value.getString("zsuserId"));
-                if (keys.hasNext()) {
-                    mailIdBuilder.append(",");
-                }
+                users[counter++] = value.get("zsuserId");
             }
-            return mailIdBuilder.toString();
+            return JSONArray.fromObject(users);
         }
-        return null;
+
+        throw new Exception();
     }
 
+    public static ZSConnectionConfiguration getZSConnection() {
+        List<ZSConnectionConfiguration> extnList = Jenkins.getInstanceOrNull()
+                .getExtensionList(ZSConnectionConfiguration.class);
+        ZSConnectionConfiguration conf = extnList.get(0);
+        conf.load();
+        return conf;
+    }
+
+    public static void setCustomFields(String customFields, JSONObject param, Map<String, Object> queryParam) {
+        if (customFields != null && customFields.length() > 0) {
+            String[] fields = customFields.split("\n");
+            for (String field : fields) {
+                String[] fieldArr = field.split("=");
+                String key = fieldArr[0];
+                String value = fieldArr[1];
+                if (param != null) {
+                    param.put(key, value);
+                }
+                if (queryParam != null) {
+                    queryParam.put(key, value);
+                }
+            }
+        }
+    }
 }

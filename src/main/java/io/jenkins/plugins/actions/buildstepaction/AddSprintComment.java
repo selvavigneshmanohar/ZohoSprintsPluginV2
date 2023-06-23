@@ -8,6 +8,7 @@ import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
+import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
@@ -44,6 +45,7 @@ public class AddSprintComment extends Builder {
         return (DescriptorImpl) super.getDescriptor();
     }
 
+    @Extension
     public static class DescriptorImpl extends BuildStepDescriptorImpl {
 
         public FormValidation doCheckNote(@QueryParameter final String note) {

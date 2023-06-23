@@ -90,7 +90,7 @@ public class UpdateWorkItem extends Recorder implements MatrixAggregatable {
                 .withName(name)
                 .withDescription(description)
                 .withStatus(status)
-                .withPrefix(priority)
+                .withPriority(priority)
                 .withType(type)
                 .withDuration(duration)
                 .withComment(startdate)

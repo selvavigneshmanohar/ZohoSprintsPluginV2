@@ -7,10 +7,11 @@ import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
-import io.jenkins.plugins.Messages;
+
 import hudson.Extension;
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import io.jenkins.plugins.Messages;
 import io.jenkins.plugins.actions.PipelineStepDescriptor;
 import io.jenkins.plugins.api.ProjectAPI;
 
@@ -51,7 +52,7 @@ public class AddFeedStatus extends Step {
     }
 
     public static class AddFeedStatusExecutor extends SynchronousNonBlockingStepExecution<Void> {
-
+        private static final long serialVersionUID = 1L;
         private final transient AddFeedStatus step;
 
         protected AddFeedStatusExecutor(AddFeedStatus step, @Nonnull StepContext context) {

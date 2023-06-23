@@ -98,7 +98,7 @@ public class UpdateWorkItem extends Step {
     }
 
     public static class UpdateWorkItemExecutor extends SynchronousNonBlockingStepExecution<Void> {
-
+        private static final long serialVersionUID = 9L;
         private final transient UpdateWorkItem step;
 
         protected UpdateWorkItemExecutor(UpdateWorkItem step, @Nonnull StepContext context) {
@@ -113,7 +113,7 @@ public class UpdateWorkItem extends Step {
                     .withName(step.name)
                     .withDescription(step.description)
                     .withStatus(step.status)
-                    .withPrefix(step.priority)
+                    .withPriority(step.priority)
                     .withType(step.type)
                     .withDuration(step.duration)
                     .withComment(step.startdate)

@@ -1,28 +1,28 @@
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
 
-    <f:entry title="Item to be added in" field="prefix">
+    <f:entry title="Prefix" field="prefix">
         <f:textbox/>
     </f:entry>
 
-    <f:entry title="Item Name" field="name">
+    <f:entry title="Name" field="name">
         <f:textbox />
     </f:entry>
 
-    <f:entry title="Item Description" field="description">
+    <f:entry title="Description" field="description">
         <f:textbox />
     </f:entry>
-    <f:entry title="Item Assignee" field="assignee">
+    <f:entry title="Assignees" field="assignee">
         <f:textbox/>
     </f:entry>
 
-    <f:entry title="Item Type" field="type">
+    <f:entry title="Type" field="type">
         <f:textbox/>
     </f:entry>
-    <f:entry title="Item Status" field="status">
+    <f:entry title="Status" field="status">
         <f:textbox/>
     </f:entry>
-    <f:entry title="Item Priority" field="priority">
+    <f:entry title="Priority" field="priority">
         <f:textbox/>
     </f:entry>
     <f:entry title="Duration" field="duration">

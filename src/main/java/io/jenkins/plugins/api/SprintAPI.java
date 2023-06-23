@@ -1,7 +1,13 @@
 package io.jenkins.plugins.api;
 
+import static io.jenkins.plugins.util.Util.replaceEnvVaribaleToValue;
+import static io.jenkins.plugins.util.Util.sprintsLogparser;
+
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -11,9 +17,8 @@ import io.jenkins.plugins.sprints.OAuthClient;
 import io.jenkins.plugins.sprints.RequestClient;
 import net.sf.json.JSONObject;
 
-import static io.jenkins.plugins.util.Util.sprintsLogparser;
-
 public class SprintAPI {
+    private static final Logger LOGGER = Logger.getLogger(SprintAPI.class.getName());
     private static final Pattern ZS_SPRINT = Pattern.compile("^(P|p)([0-9]+)#(s|S)([0-9]+)$");
     private String comment;
     private String api;
@@ -57,7 +62,7 @@ public class SprintAPI {
                 return Boolean.TRUE;
             }
         } catch (Exception e) {
-
+            LOGGER.log(Level.WARNING, "Error", e);
         }
         return Boolean.FALSE;
 
@@ -76,14 +81,15 @@ public class SprintAPI {
             if (response != null) {
                 JSONObject respObject = JSONObject.fromObject(response);
                 if (respObject.has("completedDate")) {
+                    listener.getLogger().println(sprintsLogparser("Sprint has been completed successfully", false));
+                } else {
                     listener.error(
                             sprintsLogparser("Some items are in open status. So, unable to complete the sprint", true));
-                } else {
-                    listener.getLogger().println(sprintsLogparser("Sprint has been completed successfully", false));
                     return Boolean.TRUE;
                 }
             }
         } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Error", e);
         }
         return Boolean.FALSE;
 
@@ -96,13 +102,14 @@ public class SprintAPI {
         Map<String, Object> param = new HashMap<>();
         param.put("name", this.comment);
         try {
-            OAuthClient client = new OAuthClient(api + "complete/", RequestClient.METHOD_POST, param, listener,
+            OAuthClient client = new OAuthClient(api + "notes/", RequestClient.METHOD_POST, param, listener,
                     build);
             if (client.execute() != null) {
                 listener.getLogger().println(sprintsLogparser("Comment added successfully", false));
                 return Boolean.TRUE;
             }
         } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Error", e);
         }
         return Boolean.FALSE;
     }

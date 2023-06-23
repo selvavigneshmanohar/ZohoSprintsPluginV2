@@ -61,7 +61,7 @@ public class AddSprintComment extends Step {
     }
 
     public static class AddSprintCommentExecutor extends SynchronousNonBlockingStepExecution<Void> {
-
+        private static final long serialVersionUID = 3L;
         private final transient AddSprintComment step;
 
         protected AddSprintCommentExecutor(AddSprintComment step, @Nonnull StepContext context) {

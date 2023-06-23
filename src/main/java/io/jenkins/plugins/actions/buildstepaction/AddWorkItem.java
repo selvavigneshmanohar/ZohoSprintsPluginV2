@@ -9,6 +9,7 @@ import javax.annotation.Nonnull;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
+import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
@@ -68,7 +69,7 @@ public class AddWorkItem extends Builder {
 
     @DataBoundConstructor
     public AddWorkItem(String prefix, String name, String description, String status, String type, String priority,
-            String duration, String startdate, String enddate, String customFields) {
+            String duration, String assignee, String startdate, String enddate, String customFields) {
         this.prefix = prefix;
         this.name = name;
         this.description = description;
@@ -76,6 +77,7 @@ public class AddWorkItem extends Builder {
         this.type = type;
         this.priority = priority;
         this.duration = duration;
+        this.assignee = assignee;
         this.startdate = startdate;
         this.enddate = enddate;
         this.customFields = customFields;
@@ -88,7 +90,7 @@ public class AddWorkItem extends Builder {
                 .withName(name)
                 .withDescription(description)
                 .withStatus(status)
-                .withPrefix(priority)
+                .withPriority(priority)
                 .withType(type)
                 .withAssignee(assignee)
                 .withDuration(duration)
@@ -103,6 +105,7 @@ public class AddWorkItem extends Builder {
         return (DescriptorImpl) super.getDescriptor();
     }
 
+    @Extension
     public static class DescriptorImpl extends BuildStepDescriptorImpl {
 
         @Nonnull

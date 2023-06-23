@@ -4,20 +4,18 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>3.43</version>
+        <version>4.40</version>
         <relativePath />
     </parent>
     <groupId>io.jenkins.plugins</groupId>
-    <artifactId>zohosprints</artifactId>
-    <version>1.1.5</version>
+    <artifactId>zohosprintsv2</artifactId>
+    <version>1.0</version>
     <packaging>hpi</packaging>
     <name>Zoho Sprints</name>
     <description>Plugin which wil help to do action from jenkins while running the job</description>
     <url>https://github.com/jenkinsci/zohosprints-plugin</url>
     <properties>
-        <jenkins.version>2.7.3</jenkins.version>
-        <java.level>8</java.level>
-        <changelist>-SNAPSHOT</changelist>
+        <jenkins.version>2.357</jenkins.version>
     </properties>
     <licenses>
         <license>
@@ -29,7 +27,7 @@
         <connection>scm:git:git://github.com/jenkinsci/zohosprints-plugin.git</connection>
         <developerConnection>scm:git:git@github.com:jenkinsci/zohosprints-plugin.git</developerConnection>
         <url>https://github.com/jenkinsci/zohosprints-plugin</url>
-      <tag>JP_DC_SUPPORT</tag>
+      <tag>New V2 Plugin</tag>
   </scm>
 
     <developers>
@@ -54,23 +52,23 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>log4j-over-slf4j</artifactId>
-            <version>1.7.26</version>
+            <version>1.7.36</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>jcl-over-slf4j</artifactId>
-            <version>1.7.26</version>
+            <version>1.7.36</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-jdk14</artifactId>
-            <version>1.7.26</version>
+            <version>1.7.36</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>1.7.26</version>
+            <version>1.7.36</version>
         </dependency>
         <!-- Upper boundary dependencies -->
         <dependency>
@@ -80,48 +78,29 @@
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
-            <artifactId>mailer</artifactId>
-            <version>1.20</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>matrix-project</artifactId>
             <version>1.14</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-job</artifactId>
             <version>2.0</version>
+            <scope>compile</scope>
         </dependency>
 
-
-        <dependency>
-              <groupId>org.jenkins-ci.plugins</groupId>
-              <artifactId>cloudbees-folder</artifactId>
-              <version>6.1.2</version>
-              <scope>compile</scope>
-          </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>3.7</version>
         </dependency>
-        <!-- Credentials dependency START-->
-
-        <dependency>
-            <groupId>org.jenkins-ci.plugins.workflow</groupId>
-            <artifactId>workflow-support</artifactId>
-            <version>3.3</version>
-        </dependency>
-        <!-- Credentials dependency END-->
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-step-api</artifactId>
             <version>2.20</version>
             <scope>compile</scope>
         </dependency>
-    <!-- UNIT TEST dependency START -->
+    <!-- UNIT TEST dependency START 
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -176,8 +155,8 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <!-- UNIT TEST dependency END -->
-    </dependencies>
+         UNIT TEST dependency END -->
+    </dependencies> 
     <!-- <build>
         <plugins>
             <plugin>

@@ -105,33 +105,30 @@ public class AddWorkItemOnFailure extends SimpleBuildWrapper {
             TaskListener listener, EnvVars initialEnvironment) throws IOException, InterruptedException {
         String itemPrefix, itemName;
         final Map<String, String> envMap = new HashMap<>();
-        try {
-            itemPrefix = replaceEnvVaribaleToValue(build, listener, prefix);
-            itemName = replaceEnvVaribaleToValue(build, listener, name);
-            envMap.put("SPRINTS_ISSUE_NAME", itemName);
-            envMap.put("SPRINTS_ISSUE_DESCRIPTION", replaceEnvVaribaleToValue(build, listener, description));
-            envMap.put("SPRINTS_ISSUE_PREFIX", itemPrefix);
-            // envMap.put("SPRINTS_ISSUE_ASSIGNEE", replaceEnvVaribaleToValue(build,
-            // listener,name));
-            envMap.put("SPRINTS_ISSUE_TYPE", replaceEnvVaribaleToValue(build, listener, type));
-            envMap.put("SPRINTS_ISSUE_STATUS", replaceEnvVaribaleToValue(build, listener, status));
-            envMap.put("SPRINTS_ISSUE_DURATION", replaceEnvVaribaleToValue(build, listener, duration));
-            envMap.put("SPRINTS_ISSUE_PRIORITY", replaceEnvVaribaleToValue(build, listener, priority));
-            envMap.put("SPRINTS_ISSUE_STARTDATE", replaceEnvVaribaleToValue(build, listener, startdate));
-            envMap.put("SPRINTS_ISSUE_ENDDATE", replaceEnvVaribaleToValue(build, listener, enddate));
-            envMap.put("SPRINTS_ISSUE_CUSTOMFIELD", replaceEnvVaribaleToValue(build, listener, customFields));
-            envMap.put("SPRINTS_ISSUE_BUILD_ENVIRONMENT_AVAILABLE", Boolean.toString(true));
-            if (isEmpty(itemPrefix)) {
-                throw new IllegalArgumentException("Prefix should not be empty or null");
-            }
-            if (isEmpty(itemName)) {
-                throw new IllegalArgumentException("Item name is not specified");
-            }
-        } catch (Exception e) {
-            if (listener instanceof BuildListener) {
-                ((BuildListener) listener).finished(Result.FAILURE);
-            }
+        itemPrefix = replaceEnvVaribaleToValue(build, listener, prefix);
+        itemName = replaceEnvVaribaleToValue(build, listener, name);
+        envMap.put("SPRINTS_ISSUE_NAME", itemName);
+        envMap.put("SPRINTS_ISSUE_DESCRIPTION", replaceEnvVaribaleToValue(build, listener, description));
+        envMap.put("SPRINTS_ISSUE_PREFIX", itemPrefix);
+        // envMap.put("SPRINTS_ISSUE_ASSIGNEE", replaceEnvVaribaleToValue(build,
+        // listener,name));
+        envMap.put("SPRINTS_ISSUE_TYPE", replaceEnvVaribaleToValue(build, listener, type));
+        envMap.put("SPRINTS_ISSUE_STATUS", replaceEnvVaribaleToValue(build, listener, status));
+        envMap.put("SPRINTS_ISSUE_DURATION", replaceEnvVaribaleToValue(build, listener, duration));
+        envMap.put("SPRINTS_ISSUE_PRIORITY", replaceEnvVaribaleToValue(build, listener, priority));
+        envMap.put("SPRINTS_ISSUE_STARTDATE", replaceEnvVaribaleToValue(build, listener, startdate));
+        envMap.put("SPRINTS_ISSUE_ENDDATE", replaceEnvVaribaleToValue(build, listener, enddate));
+        envMap.put("SPRINTS_ISSUE_CUSTOMFIELD", replaceEnvVaribaleToValue(build, listener, customFields));
+        envMap.put("SPRINTS_ISSUE_BUILD_ENVIRONMENT_AVAILABLE", Boolean.toString(true));
+        if (isEmpty(itemPrefix)) {
+            listener.error("Prefix should not be empty or null", null);
+            ((BuildListener) listener).finished(Result.FAILURE);
         }
+        if (isEmpty(itemName)) {
+            listener.error("Item name is not specified", null);
+            ((BuildListener) listener).finished(Result.FAILURE);
+        }
+
         context.getEnv().putAll(envMap);
     }
 

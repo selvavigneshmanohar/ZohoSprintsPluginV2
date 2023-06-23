@@ -1,6 +1,10 @@
 package io.jenkins.plugins.configuration;
 
-import org.apache.commons.httpclient.HttpStatus;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.servlet.http.HttpServletResponse;
+
 import org.kohsuke.stapler.WebMethod;
 import org.kohsuke.stapler.json.JsonBody;
 import org.kohsuke.stapler.json.JsonHttpResponse;
@@ -8,10 +12,13 @@ import org.kohsuke.stapler.verb.POST;
 
 import hudson.Extension;
 import hudson.model.RootAction;
+import io.jenkins.plugins.sprints.OAuthClient;
+import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 
 @Extension
 public class ZSConnectionConfigAPI implements RootAction {
+    private static final Logger LOGGER = Logger.getLogger(ZSConnectionConfigAPI.class.getName());
 
     @Override
     public String getIconFileName() {
@@ -31,15 +38,26 @@ public class ZSConnectionConfigAPI implements RootAction {
     @POST
     @WebMethod(name = "settings")
     public JsonHttpResponse doCreate(@JsonBody ZSConnection configuration) {
+        Jenkins.get().getACL().checkPermission(Jenkins.ADMINISTER);
         JSONObject response = new JSONObject();
-        int statusCode = HttpStatus.SC_CREATED;
+        int statusCode = HttpServletResponse.SC_CREATED;
         if (!configuration.isValid()) {
             response.put("status", "failed");
             response.put("message", "Mandatory filed(s) are missiong");
-            statusCode = HttpStatus.SC_INTERNAL_SERVER_ERROR;
+            statusCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
         } else {
-            new ZSConnectionConfiguration(configuration).save();
-            response.put("status", "success");
+            ZSConnectionConfiguration config = new ZSConnectionConfiguration(configuration);
+            config.save();
+            try {
+                OAuthClient.generateNewAccessToken();
+                response.put("status", "success");
+            } catch (Exception e) {
+                LOGGER.log(Level.WARNING, "Error while OAuth token generation", e);
+                doReset();
+                response.put("status", "failed");
+                statusCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
+            }
+
         }
         return new JsonHttpResponse(response, statusCode);
     }
@@ -47,6 +65,7 @@ public class ZSConnectionConfigAPI implements RootAction {
     @POST
     @WebMethod(name = "reset")
     public JsonHttpResponse doReset() {
+        Jenkins.get().getACL().checkPermission(Jenkins.ADMINISTER);
         JSONObject response = new JSONObject();
         new ZSConnectionConfiguration(new ZSConnection()).save();
         response.put("status", "success");

@@ -1,7 +1,5 @@
 package io.jenkins.plugins.actions;
 
-import java.util.logging.Logger;
-
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
@@ -13,17 +11,8 @@ import hudson.util.FormValidation;
 import net.sf.json.JSONObject;
 
 public class BuildStepDescriptorImpl extends BuildStepDescriptor<Builder> {
-    Logger logger = Logger.getLogger(BuildStepDescriptorImpl.class.getName());
-
-    public BuildStepDescriptorImpl() {
-        super();
-        load();
-    }
-
     @Override
     public boolean isApplicable(Class<? extends AbstractProject> jobType) {
-        logger.info("" + jobType.getName());
-        logger.info("" + !MatrixProject.class.equals(jobType));
         return !MatrixProject.class.equals(jobType);
     }
 

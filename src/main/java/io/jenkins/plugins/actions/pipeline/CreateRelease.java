@@ -87,7 +87,7 @@ public class CreateRelease extends Step {
     }
 
     public static class CreateReleaseExecutor extends SynchronousNonBlockingStepExecution<Void> {
-
+        private static final long serialVersionUID = 6L;
         private final transient CreateRelease step;
 
         protected CreateReleaseExecutor(CreateRelease step, @Nonnull StepContext context) {

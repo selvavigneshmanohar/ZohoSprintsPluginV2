@@ -3,6 +3,7 @@ package io.jenkins.plugins.sprints;
 import hudson.ProxyConfiguration;
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import hudson.util.Secret;
 import io.jenkins.plugins.configuration.ZSConnectionConfiguration;
 import io.jenkins.plugins.util.Util;
 import jenkins.model.Jenkins;
@@ -58,8 +59,8 @@ public class RequestClient {
     private Map<String, String> header = new HashMap<>();
     private boolean isJSONBodyContent;
     private Object bodyContent = null;
-    private TaskListener listener;
-    private Run<?, ?> build;
+    private TaskListener listener = null;
+    private Run<?, ?> build = null;
     private int responsecode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 
     public int getResponsecode() {
@@ -136,12 +137,6 @@ public class RequestClient {
                 HttpPost post = new HttpPost(url);
                 setEntity(post);
                 return post;
-            } else {
-                HttpDelete delete = new HttpDelete(url);
-                if (!param.isEmpty()) {
-                    delete = constructUrl(delete);
-                }
-                return delete;
             }
         }
         return null;
@@ -164,13 +159,11 @@ public class RequestClient {
     }
 
     private void setZSAPIDetails(final String api) throws Exception {
-        if (api.startsWith("https")) {
+        ZSConnectionConfiguration conf = Util.getZSConnection();
+        if (api.startsWith(conf.getAccountsDomain())) {
+            this.url = api;
             return;
         }
-        List<ZSConnectionConfiguration> extnList = Jenkins.getInstance()
-                .getExtensionList(ZSConnectionConfiguration.class);
-        ZSConnectionConfiguration conf = extnList.get(0);
-
         header.put("X-ZA-SOURCE", conf.getZsheader());
         header.put("Authorization", "Zoho-oauthtoken " + conf.getAccessToken());
         this.url = conf.getZSApiPath() + api;
@@ -200,12 +193,12 @@ public class RequestClient {
                 .create()
                 .setDefaultRequestConfig(config);
 
-        if (Util.isProxyConfigured()) {
-            ProxyConfiguration proxy = Jenkins.getInstance().proxy;
+        ProxyConfiguration proxy = Jenkins.get().proxy;
+        if (proxy != null) {
             String hosturl = proxy.name;
             int port = proxy.port;
             String uname = proxy.getUserName();
-            String password = proxy.getPassword();
+            String password = Secret.toString(proxy.getSecretPassword());
             HttpHost host = new HttpHost(hosturl, port);
             builder = builder.useSystemProperties();
             builder.setProxy(host);
@@ -264,36 +257,25 @@ public class RequestClient {
     }
 
     /**
-     * @param delete HttpDelete Object
-     * @return HttpDelete function
-     * @throws InterruptedException
-     * @throws IOException
-     */
-    private HttpDelete constructUrl(HttpDelete delete) throws IOException, InterruptedException {
-        List<NameValuePair> list = new ArrayList<>();
-        for (Map.Entry<String, Object> entry : param.entrySet()) {
-            String key = entry.getKey();
-            Object value = entry.getValue();
-            list.add(new BasicNameValuePair(key, replaceEnvVaribaleToValue(build, listener, value.toString())));
-        }
-        url = url + "?" + URLEncodedUtils.format(list, CHARSET);
-        return new HttpDelete(url);
-    }
-
-    /**
      * @param post HttpPost Object
      * @throws UnsupportedEncodingException Throws when unsupported Encoding happens
      */
-    private void setEntity(HttpPost post) throws UnsupportedEncodingException {
+    private void setEntity(HttpPost post) throws UnsupportedEncodingException, IOException, InterruptedException {
 
         if (param != null && !param.isEmpty()) {
             List<NameValuePair> entityList = new ArrayList<>();
             for (Map.Entry<String, Object> entry : param.entrySet()) {
-                entityList.add(new BasicNameValuePair(entry.getKey(), entry.getValue().toString()));
+                Object value = entry.getValue();
+                if (value != null && value.toString().length() > 0) {
+                    entityList.add(new BasicNameValuePair(entry.getKey(),
+                            (build != null && listener != null)
+                                    ? replaceEnvVaribaleToValue(build, listener, value.toString())
+                                    : value.toString()));
+                }
 
             }
             post.setEntity(new UrlEncodedFormEntity(entityList));
-        } else {
+        } else if (bodyContent != null) {
             setJSONBodyEntity(post);
         }
 

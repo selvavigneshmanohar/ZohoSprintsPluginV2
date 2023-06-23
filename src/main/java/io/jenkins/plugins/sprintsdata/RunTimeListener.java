@@ -10,10 +10,6 @@ import hudson.model.listeners.RunListener;
 import io.jenkins.plugins.api.ItemAPI;
 import javax.annotation.Nonnull;
 
-/**
- * @author selvavignesh.m
- * @version 1.0
- */
 @Extension
 public class RunTimeListener extends RunListener<Run<?, ?>> {
     @Override
@@ -38,7 +34,7 @@ public class RunTimeListener extends RunListener<Run<?, ?>> {
                         .withName(name)
                         .withDescription(description)
                         .withStatus(status)
-                        .withPrefix(priority)
+                        .withPriority(priority)
                         .withType(type)
                         .withDuration(duration)
                         .withAssignee(assignee)
@@ -50,7 +46,6 @@ public class RunTimeListener extends RunListener<Run<?, ?>> {
 
         } catch (Exception e) {
             listener.error("Work Item not created");
-            listener.error(e.getMessage());
         }
     }
 
