@@ -11,7 +11,7 @@ import jenkins.model.GlobalConfiguration;
 @Extension
 public class ZSConnectionConfiguration extends GlobalConfiguration {
     private String accountsDomain, serviceDomain, serviceAPIDomain, redirectURL;
-    private Secret clientId, clientSecret, refreshToken, zsheader, accessToken, zoid;
+    private Secret clientId, clientSecret, refreshToken, accessToken, zoid;
 
     public ZSConnectionConfiguration() {
         load();
@@ -25,8 +25,7 @@ public class ZSConnectionConfiguration extends GlobalConfiguration {
                 .withZoid(connection.getZoid())
                 .withClientId(connection.getClientId())
                 .withClientSecret(connection.getClientSecret())
-                .withRefreshToken(connection.getRefreshToken())
-                .withZsheader(connection.getZSheader());
+                .withRefreshToken(connection.getRefreshToken());
     }
 
     private Secret getSecret(String value) {
@@ -35,15 +34,6 @@ public class ZSConnectionConfiguration extends GlobalConfiguration {
 
     private String getString(Secret value) {
         return Secret.toString(value);
-    }
-
-    public String getZsheader() {
-        return getString(zsheader);
-    }
-
-    private ZSConnectionConfiguration withZsheader(String zsheader) {
-        this.zsheader = getSecret(zsheader);
-        return this;
     }
 
     public String getAccountsDomain() {
