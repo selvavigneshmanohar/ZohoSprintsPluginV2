@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 import hudson.model.AbstractBuild;
@@ -25,7 +24,6 @@ import net.sf.json.JSONObject;
  */
 public class Util {
 
-    private static final Logger LOGGER = Logger.getLogger(Util.class.getName());
     private static final String PLUGIN_RESOUCE_PATH = "/plugin/zohosprints/";
 
     public static final Pattern ZS_RELEASE = Pattern.compile("^(P|p)([0-9]+)#(R|r)([0-9]+)$");
@@ -106,8 +104,7 @@ public class Util {
     }
 
     public static ZSConnectionConfiguration getZSConnection() {
-        List<ZSConnectionConfiguration> extnList = Jenkins.getInstanceOrNull()
-                .getExtensionList(ZSConnectionConfiguration.class);
+        List<ZSConnectionConfiguration> extnList = Jenkins.get().getExtensionList(ZSConnectionConfiguration.class);
         ZSConnectionConfiguration conf = extnList.get(0);
         conf.load();
         return conf;

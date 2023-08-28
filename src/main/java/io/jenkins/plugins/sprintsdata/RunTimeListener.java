@@ -8,6 +8,9 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.model.listeners.RunListener;
 import io.jenkins.plugins.api.ItemAPI;
+
+import java.io.IOException;
+
 import javax.annotation.Nonnull;
 
 @Extension
@@ -44,7 +47,7 @@ public class RunTimeListener extends RunListener<Run<?, ?>> {
                         .build().create();
             }
 
-        } catch (Exception e) {
+        } catch (IOException | InterruptedException e) {
             listener.error("Work Item not created");
         }
     }
