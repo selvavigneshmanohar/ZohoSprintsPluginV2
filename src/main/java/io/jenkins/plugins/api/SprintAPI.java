@@ -1,19 +1,15 @@
 package io.jenkins.plugins.api;
 
-import static io.jenkins.plugins.util.Util.replaceEnvVaribaleToValue;
 import static io.jenkins.plugins.util.Util.sprintsLogparser;
-
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import io.jenkins.plugins.sprints.OAuthClient;
+import io.jenkins.plugins.sprints.ZohoClient;
 import io.jenkins.plugins.sprints.RequestClient;
 import net.sf.json.JSONObject;
 
@@ -55,9 +51,10 @@ public class SprintAPI {
             return Boolean.FALSE;
         }
         try {
-            OAuthClient client = new OAuthClient(api + "start/", RequestClient.METHOD_POST, new HashMap<>(), listener,
+            ZohoClient client = new ZohoClient(api + "start/", RequestClient.METHOD_POST, new HashMap<>(), listener,
                     build);
-            if (client.execute() != null) {
+            client.execute();
+            if (client.isSuccessRequest()) {
                 listener.getLogger().println(sprintsLogparser("Sprint has been started successfully", false));
                 return Boolean.TRUE;
             }
@@ -75,18 +72,18 @@ public class SprintAPI {
         Map<String, Object> param = new HashMap<>();
         param.put("action", "complete");
         try {
-            OAuthClient client = new OAuthClient(api + "complete/", RequestClient.METHOD_POST, param, listener,
+            ZohoClient client = new ZohoClient(api + "complete/", RequestClient.METHOD_POST, param, listener,
                     build);
             String response = client.execute();
-            if (response != null) {
+            if (client.isSuccessRequest()) {
                 JSONObject respObject = JSONObject.fromObject(response);
                 if (respObject.has("completedDate")) {
                     listener.getLogger().println(sprintsLogparser("Sprint has been completed successfully", false));
                 } else {
                     listener.error(
                             sprintsLogparser("Some items are in open status. So, unable to complete the sprint", true));
-                    return Boolean.TRUE;
                 }
+                return Boolean.TRUE;
             }
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Error", e);
@@ -102,9 +99,10 @@ public class SprintAPI {
         Map<String, Object> param = new HashMap<>();
         param.put("name", this.comment);
         try {
-            OAuthClient client = new OAuthClient(api + "notes/", RequestClient.METHOD_POST, param, listener,
+            ZohoClient client = new ZohoClient(api + "notes/", RequestClient.METHOD_POST, param, listener,
                     build);
-            if (client.execute() != null) {
+            client.execute();
+            if (client.isSuccessRequest()) {
                 listener.getLogger().println(sprintsLogparser("Comment added successfully", false));
                 return Boolean.TRUE;
             }

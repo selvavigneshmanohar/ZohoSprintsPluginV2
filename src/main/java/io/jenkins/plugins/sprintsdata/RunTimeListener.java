@@ -8,6 +8,7 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.model.listeners.RunListener;
 import io.jenkins.plugins.api.ItemAPI;
+import io.jenkins.plugins.model.Item;
 
 import java.io.IOException;
 
@@ -33,18 +34,19 @@ public class RunTimeListener extends RunListener<Run<?, ?>> {
                 String startdate = envVars.get("SPRINTS_ISSUE_STARTDATE");
                 String enddate = envVars.get("SPRINTS_ISSUE_ENDDATE");
                 String customfield = envVars.get("SPRINTS_ISSUE_CUSTOMFIELD");
-                new ItemAPI.ItemActionBuilder(prefix, run, listener)
-                        .withName(name)
-                        .withDescription(description)
-                        .withStatus(status)
-                        .withPriority(priority)
-                        .withType(type)
-                        .withDuration(duration)
-                        .withAssignee(assignee)
-                        .withComment(startdate)
-                        .withEnddate(enddate)
-                        .withCustomFields(customfield)
-                        .build().create();
+                Item item = Item.getInstance().setName(name)
+                        .setDescription(description)
+                        .setStatus(status)
+                        .setType(type)
+                        .setPriority(priority)
+                        .setDuration(duration)
+                        .setAssignee(assignee)
+                        .setStartdate(startdate)
+                        .setEnddate(enddate)
+                        .setCustomFields(customfield);
+                new ItemAPI.ItemActionBuilder(prefix, run, listener, item)
+                        .build()
+                        .create();
             }
 
         } catch (IOException | InterruptedException e) {

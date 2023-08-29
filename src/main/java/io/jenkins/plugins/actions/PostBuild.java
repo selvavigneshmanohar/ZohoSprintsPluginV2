@@ -14,6 +14,16 @@ import hudson.tasks.Recorder;
 
 public abstract class PostBuild extends Recorder implements MatrixAggregatable {
 
+    protected String prefix;
+
+    public PostBuild(String prefix) {
+        this.prefix = prefix;
+    }
+
+    public String getPrefix() {
+        return prefix;
+    }
+
     public abstract boolean _perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
             throws InterruptedException, IOException;
 
@@ -44,6 +54,11 @@ public abstract class PostBuild extends Recorder implements MatrixAggregatable {
                 return true;
             }
         };
+    }
+
+    @Override
+    public PostBuildDescriptor getDescriptor() {
+        return (PostBuildDescriptor) super.getDescriptor();
     }
 
 }

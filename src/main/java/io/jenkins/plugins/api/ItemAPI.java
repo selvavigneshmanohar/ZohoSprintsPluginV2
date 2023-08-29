@@ -16,7 +16,8 @@ import javax.annotation.Nonnull;
 
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import io.jenkins.plugins.sprints.OAuthClient;
+import io.jenkins.plugins.sprints.ZohoClient;
+import io.jenkins.plugins.model.Item;
 import io.jenkins.plugins.sprints.RequestClient;
 import io.jenkins.plugins.util.Util;
 import net.sf.json.JSONArray;
@@ -35,50 +36,49 @@ public final class ItemAPI {
     private ItemAPI(ItemActionBuilder builder) {
         this.listener = builder.listener;
         this.build = builder.build;
-        this.comment = builder.comment;
-        this.name = builder.name;
-        this.description = builder.description;
-        this.status = builder.status;
-        this.type = builder.type;
-        this.priority = builder.priority;
-        this.duration = builder.duration;
-        this.startdate = builder.startdate;
-        this.enddate = builder.enddate;
-        this.customFields = builder.customFields;
+        this.comment = builder.item.getNote();
+        this.name = builder.item.getName();
+        this.description = builder.item.getDescription();
+        this.status = builder.item.getStatus();
+        this.type = builder.item.getType();
+        this.priority = builder.item.getPriority();
+        this.duration = builder.item.getDuration();
+        this.startdate = builder.item.getStartdate();
+        this.enddate = builder.item.getEnddate();
+        this.customFields = builder.item.getCustomFields();
+        this.assignee = builder.item.getAssignee();
         this.projectNumber = builder.projectNumber;
         this.sprintNumber = builder.sprintNumber;
         this.itemNumber = builder.itemNumber;
-        this.assignee = builder.assignee;
     }
 
     public boolean addComment() {
-        boolean result = Boolean.FALSE;
         if (projectNumber == null || sprintNumber == null || itemNumber == null) {
             listener.error("Invalid Prefix");
-            return result;
+            return Boolean.FALSE;
         }
         String url = String.format("/projects/no-%s/sprints/no-%s/item/no-%s/notes/", projectNumber, sprintNumber,
                 itemNumber);
         Map<String, Object> param = new HashMap<>();
         param.put("name", comment);
         try {
-            OAuthClient client = new OAuthClient(url, RequestClient.METHOD_POST, param, listener, build);
-            if (client.execute() != null) {
+            ZohoClient client = new ZohoClient(url, RequestClient.METHOD_POST, param, listener, build);
+            client.execute();
+            if (client.isSuccessRequest()) {
                 listener.getLogger().println(sprintsLogparser("Comment added successfully", false));
-                result = Boolean.TRUE;
+                return Boolean.TRUE;
             }
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Error at add Work Item Comment", e);
         }
-        return result;
+        return Boolean.FALSE;
 
     }
 
     public boolean create() {
-        boolean result = Boolean.FALSE;
         if (projectNumber == null || sprintNumber == null) {
             listener.error("Invalid Prefix");
-            return result;
+            return Boolean.FALSE;
         }
         if (assignee != null) {
             try {
@@ -86,7 +86,7 @@ public final class ItemAPI {
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, "", e);
                 listener.error("Error occure while fetching assignees");
-                return result;
+                return Boolean.FALSE;
             }
         }
         String url = String.format("/projects/no-%s/sprints/no-%s/item/", projectNumber, sprintNumber);
@@ -118,9 +118,9 @@ public final class ItemAPI {
         param.put("users", zsuids);
         Util.setCustomFields(customFields, null, param);
         try {
-            OAuthClient client = new OAuthClient(url, RequestClient.METHOD_POST, param, listener, build);
-            String response = client.execute();
-            if (response != null) {
+            ZohoClient client = new ZohoClient(url, RequestClient.METHOD_POST, param, listener, build);
+            client.execute();
+            if (client.isSuccessRequest()) {
                 listener.getLogger()
                         .println(sprintsLogparser(isupdate ? "Item fields are updated" : "Item has been added", false));
                 return Boolean.TRUE;
@@ -133,20 +133,31 @@ public final class ItemAPI {
     }
 
     public static class ItemActionBuilder {
-        private String comment = null, name = null, description = null, status = null, type = null, priority = null,
-                duration = null, startdate = null, enddate = null, customFields = null,
-                prefix = null, assignee = null;
+        /*
+         * private String comment = null, name = null, description = null, status =
+         * null, type = null, priority = null,
+         * duration = null, startdate = null, enddate = null, customFields = null,
+         * prefix = null, assignee = null;
+         */
+        private String prefix;
+        private Item item;
 
         private Integer projectNumber, itemNumber, sprintNumber;
         private Run<?, ?> build;
         private TaskListener listener;
         public static final Pattern ZS_ITEM = Pattern.compile("^(P|p)([0-9]+)#(s|S)([0-9]+)(#(i|I)([0-9]+))?");
 
-        public ItemActionBuilder(@Nonnull String prefix, Run<?, ?> build, TaskListener listener)
+        public ItemActionBuilder(@Nonnull String prefix, Run<?, ?> build, TaskListener listener, Item item)
                 throws IOException, InterruptedException {
             withPrefix(replaceEnvVaribaleToValue(build, listener, prefix))
                     .withAbstractBuild(build)
-                    .withBuildListener(listener);
+                    .withBuildListener(listener)
+                    .withItem(item);
+        }
+
+        private ItemActionBuilder withItem(Item item) {
+            this.item = item;
+            return this;
         }
 
         private ItemActionBuilder withBuildListener(TaskListener listener) {
@@ -159,66 +170,68 @@ public final class ItemAPI {
             return this;
         }
 
-        public ItemActionBuilder withAssignee(String assignee) {
-            this.assignee = assignee;
-            return this;
-        }
-
-        public ItemActionBuilder withName(String name) {
-
-            this.name = name;
-            return this;
-        }
-
-        public ItemActionBuilder withDescription(String description) {
-            this.description = description;
-            return this;
-        }
-
-        public ItemActionBuilder withStatus(String status) {
-            this.status = status;
-            return this;
-        }
-
-        public ItemActionBuilder withType(String type) {
-            this.type = type;
-            return this;
-        }
-
-        public ItemActionBuilder withPriority(String priority) {
-            this.priority = priority;
-            return this;
-        }
-
-        public ItemActionBuilder withDuration(String duration) {
-            this.duration = duration;
-            return this;
-        }
-
-        public ItemActionBuilder withStartdate(String startdate) {
-            this.startdate = startdate;
-            return this;
-        }
-
-        public ItemActionBuilder withEnddate(String enddate) {
-            this.enddate = enddate;
-            return this;
-        }
-
-        public ItemActionBuilder withCustomFields(String customFields) {
-            this.customFields = customFields;
-            return this;
-        }
-
         public ItemActionBuilder withPrefix(String prefix) {
             this.prefix = prefix;
             return this;
         }
-
-        public ItemActionBuilder withComment(String comment) {
-            this.comment = comment;
-            return this;
-        }
+        /*
+         * public ItemActionBuilder withAssignee(String assignee) {
+         * this.assignee = assignee;
+         * return this;
+         * }
+         * 
+         * public ItemActionBuilder withName(String name) {
+         * 
+         * this.name = name;
+         * return this;
+         * }
+         * 
+         * public ItemActionBuilder withDescription(String description) {
+         * this.description = description;
+         * return this;
+         * }
+         * 
+         * public ItemActionBuilder withStatus(String status) {
+         * this.status = status;
+         * return this;
+         * }
+         * 
+         * public ItemActionBuilder withType(String type) {
+         * this.type = type;
+         * return this;
+         * }
+         * 
+         * public ItemActionBuilder withPriority(String priority) {
+         * this.priority = priority;
+         * return this;
+         * }
+         * 
+         * public ItemActionBuilder withDuration(String duration) {
+         * this.duration = duration;
+         * return this;
+         * }
+         * 
+         * public ItemActionBuilder withStartdate(String startdate) {
+         * this.startdate = startdate;
+         * return this;
+         * }
+         * 
+         * public ItemActionBuilder withEnddate(String enddate) {
+         * this.enddate = enddate;
+         * return this;
+         * }
+         * 
+         * public ItemActionBuilder withCustomFields(String customFields) {
+         * this.customFields = customFields;
+         * return this;
+         * }
+         * 
+         * 
+         * public ItemActionBuilder withComment(String comment) {
+         * this.comment = comment;
+         * return this;
+         * }
+         */
 
         public ItemAPI build() {
             Matcher matcher = ZS_ITEM.matcher(prefix);

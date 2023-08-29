@@ -12,7 +12,7 @@ import org.kohsuke.stapler.verb.POST;
 
 import hudson.Extension;
 import hudson.model.RootAction;
-import io.jenkins.plugins.sprints.OAuthClient;
+import io.jenkins.plugins.sprints.ZohoClient;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 
@@ -49,7 +49,7 @@ public class ZSConnectionConfigAPI implements RootAction {
             ZSConnectionConfiguration config = new ZSConnectionConfiguration(configuration);
             config.save();
             try {
-                OAuthClient.generateNewAccessToken();
+                ZohoClient.generateNewAccessToken();
                 response.put("status", "success");
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, "Error while OAuth token generation", e);

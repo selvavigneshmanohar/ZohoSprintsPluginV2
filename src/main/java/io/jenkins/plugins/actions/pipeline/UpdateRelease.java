@@ -11,54 +11,14 @@ import hudson.Extension;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import io.jenkins.plugins.actions.PipelineStepDescriptor;
+import io.jenkins.plugins.actions.ReleasePipelineStepBuilder;
 import io.jenkins.plugins.api.ReleaseAPI;
 
-public class UpdateRelease extends Step {
-    private String prefix, name, owners, goal, stage, startdate, enddate, customFields;
-
-    public String getPrefix() {
-        return prefix;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getOwners() {
-        return owners;
-    }
-
-    public String getGoal() {
-        return goal;
-    }
-
-    public String getStage() {
-        return stage;
-    }
-
-    public String getStartdate() {
-        return startdate;
-    }
-
-    public String getEnddate() {
-        return enddate;
-    }
-
-    public String getCustomFields() {
-        return customFields;
-    }
-
+public class UpdateRelease extends ReleasePipelineStepBuilder {
     @DataBoundConstructor
-    public UpdateRelease(String prefix, String name, String owners, String goal, String stage, String startdate,
+    public UpdateRelease(String prefix, String name, String goal, String stage, String startdate,
             String enddate, String customFields) {
-        this.prefix = prefix;
-        this.name = name;
-        this.owners = owners;
-        this.goal = goal;
-        this.stage = stage;
-        this.startdate = startdate;
-        this.enddate = enddate;
-        this.customFields = customFields;
+        super(prefix, name, null, goal, stage, startdate, enddate, customFields);
     }
 
     @Override
@@ -101,15 +61,9 @@ public class UpdateRelease extends Step {
         @Override
         protected Void run() throws Exception {
             new ReleaseAPI.ReleaseAPIBuilder(step.prefix, getContext().get(Run.class),
-                    getContext().get(TaskListener.class))
-                    .withName(step.name)
-                    .withGoal(step.goal)
-                    .withOwners(step.owners)
-                    .withStage(step.stage)
-                    .withStartdate(step.startdate)
-                    .withEnddate(step.enddate)
-                    .withCustomFields(step.customFields)
-                    .build().create();
+                    getContext().get(TaskListener.class), step.release)
+                    .build()
+                    .update();
             return null;
         }
 

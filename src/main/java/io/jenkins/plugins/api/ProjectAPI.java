@@ -5,22 +5,24 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import io.jenkins.plugins.sprints.OAuthClient;
+import io.jenkins.plugins.sprints.ZohoClient;
 import io.jenkins.plugins.sprints.RequestClient;
-import io.jenkins.plugins.util.Util;
 import static io.jenkins.plugins.util.Util.sprintsLogparser;
 
 public final class ProjectAPI {
     private static final Logger LOGGER = Logger.getLogger(ProjectAPI.class.getName());
+    public static final Pattern ZS_PROJECT = Pattern.compile("^(P|p)([0-9]+)$");
     private String feed;
     private Integer projectNumber;
     private Run<?, ?> build;
     private TaskListener listener;
 
     public ProjectAPI(String prefix, String feed, Run<?, ?> build, TaskListener listener) {
-        Matcher matcher = Util.ZS_PROJECT.matcher(prefix);
+        Matcher matcher = ZS_PROJECT.matcher(prefix);
         this.projectNumber = matcher.matches() ? Integer.parseInt(matcher.group(2)) : null;
         this.feed = feed;
         this.build = build;
@@ -36,8 +38,9 @@ public final class ProjectAPI {
         Map<String, Object> param = new HashMap<>();
         param.put("name", feed);
         try {
-            OAuthClient client = new OAuthClient(url, RequestClient.METHOD_POST, param, listener, build);
-            if (client.execute() != null) {
+            ZohoClient client = new ZohoClient(url, RequestClient.METHOD_POST, param, listener, build);
+            client.execute();
+            if (client.isSuccessRequest()) {
                 listener.getLogger().println(sprintsLogparser("Feed status successfully added", false));
                 return Boolean.TRUE;
             }

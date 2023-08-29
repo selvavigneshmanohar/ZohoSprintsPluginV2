@@ -12,18 +12,14 @@ import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
-import hudson.tasks.Builder;
 import hudson.util.FormValidation;
 import io.jenkins.plugins.Messages;
+import io.jenkins.plugins.actions.BuildStep;
 import io.jenkins.plugins.actions.BuildStepDescriptorImpl;
 import io.jenkins.plugins.api.SprintAPI;
 
-public class AddSprintComment extends Builder {
-    private String prefix, note;
-
-    public String getPrefix() {
-        return prefix;
-    }
+public class AddSprintComment extends BuildStep {
+    private String note;
 
     public String getNote() {
         return note;
@@ -31,7 +27,7 @@ public class AddSprintComment extends Builder {
 
     @DataBoundConstructor
     public AddSprintComment(String prefix, String note) {
-        this.prefix = prefix;
+        super(prefix);
         this.note = note;
     }
 
@@ -39,10 +35,6 @@ public class AddSprintComment extends Builder {
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
             throws InterruptedException, IOException {
         return new SprintAPI(prefix, listener, build).withComment(note).addComment();
-    }
-
-    public DescriptorImpl getDescriptor() {
-        return (DescriptorImpl) super.getDescriptor();
     }
 
     @Extension

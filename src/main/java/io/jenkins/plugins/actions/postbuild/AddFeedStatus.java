@@ -1,12 +1,9 @@
 package io.jenkins.plugins.actions.postbuild;
 
 import java.io.IOException;
-
 import javax.annotation.Nonnull;
-
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
-
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
@@ -16,14 +13,9 @@ import io.jenkins.plugins.Messages;
 import io.jenkins.plugins.actions.PostBuild;
 import io.jenkins.plugins.actions.PostBuildDescriptor;
 import io.jenkins.plugins.api.ProjectAPI;
-import jenkins.model.Jenkins;
 
 public class AddFeedStatus extends PostBuild {
-    private String prefix, feed;
-
-    public String getPrefix() {
-        return prefix;
-    }
+    private String feed;
 
     public String getFeed() {
         return feed;
@@ -31,13 +23,8 @@ public class AddFeedStatus extends PostBuild {
 
     @DataBoundConstructor
     public AddFeedStatus(String prefix, String feed) {
-        this.prefix = prefix;
+        super(prefix);
         this.feed = feed;
-    }
-
-    @Override
-    public DescriptorImpl getDescriptor() {
-        return (DescriptorImpl) Jenkins.get().getDescriptor(getClass());
     }
 
     @Override

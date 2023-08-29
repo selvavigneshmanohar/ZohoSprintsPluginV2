@@ -1,76 +1,33 @@
 package io.jenkins.plugins.actions.postbuild;
 
 import java.io.IOException;
-
 import javax.annotation.Nonnull;
-
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
-
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.util.FormValidation;
 import io.jenkins.plugins.Messages;
-import io.jenkins.plugins.actions.PostBuild;
 import io.jenkins.plugins.actions.PostBuildDescriptor;
+import io.jenkins.plugins.actions.ReleasePostBuilder;
 import io.jenkins.plugins.api.ReleaseAPI;
 
-public class UpdateRelease extends PostBuild {
-    private String prefix, name, goal, stage, startdate, enddate, customFields;
-
-    public String getPrefix() {
-        return prefix;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getGoal() {
-        return goal;
-    }
-
-    public String getStage() {
-        return stage;
-    }
-
-    public String getStartdate() {
-        return startdate;
-    }
-
-    public String getEnddate() {
-        return enddate;
-    }
-
-    public String getCustomFields() {
-        return customFields;
-    }
-
+public class UpdateRelease extends ReleasePostBuilder {
     @DataBoundConstructor
     public UpdateRelease(String prefix, String name, String goal, String stage, String startdate,
             String enddate, String customFields) {
-        this.prefix = prefix;
-        this.name = name;
-        this.goal = goal;
-        this.stage = stage;
-        this.startdate = startdate;
-        this.enddate = enddate;
-        this.customFields = customFields;
+        super(prefix, name, null, goal, stage, startdate, enddate, customFields);
     }
 
     @Override
     public boolean _perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
             throws InterruptedException, IOException {
-        return new ReleaseAPI.ReleaseAPIBuilder(prefix, build, listener)
-                .withName(name)
-                .withGoal(goal)
-                .withStage(stage)
-                .withStartdate(startdate)
-                .withEnddate(enddate)
-                .withCustomFields(customFields)
-                .build().update();
+        return new ReleaseAPI.ReleaseAPIBuilder(prefix, build, listener, release)
+                .build()
+                .update();
+
     }
 
     @Extension
@@ -79,7 +36,7 @@ public class UpdateRelease extends PostBuild {
         @Nonnull
         @Override
         public String getDisplayName() {
-            return Messages.release_create();
+            return Messages.release_update();
         }
 
         public FormValidation doCheckPrefix(@QueryParameter final String goal) {

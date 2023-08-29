@@ -110,8 +110,7 @@ public class AddWorkItemOnFailure extends SimpleBuildWrapper {
         envMap.put("SPRINTS_ISSUE_NAME", itemName);
         envMap.put("SPRINTS_ISSUE_DESCRIPTION", replaceEnvVaribaleToValue(build, listener, description));
         envMap.put("SPRINTS_ISSUE_PREFIX", itemPrefix);
-        // envMap.put("SPRINTS_ISSUE_ASSIGNEE", replaceEnvVaribaleToValue(build,
-        // listener,name));
+        envMap.put("SPRINTS_ISSUE_ASSIGNEE", replaceEnvVaribaleToValue(build, listener, name));
         envMap.put("SPRINTS_ISSUE_TYPE", replaceEnvVaribaleToValue(build, listener, type));
         envMap.put("SPRINTS_ISSUE_STATUS", replaceEnvVaribaleToValue(build, listener, status));
         envMap.put("SPRINTS_ISSUE_DURATION", replaceEnvVaribaleToValue(build, listener, duration));
@@ -121,11 +120,11 @@ public class AddWorkItemOnFailure extends SimpleBuildWrapper {
         envMap.put("SPRINTS_ISSUE_CUSTOMFIELD", replaceEnvVaribaleToValue(build, listener, customFields));
         envMap.put("SPRINTS_ISSUE_BUILD_ENVIRONMENT_AVAILABLE", Boolean.toString(true));
         if (isEmpty(itemPrefix)) {
-            listener.error("Prefix should not be empty or null", null);
+            listener.error("Prefix should not be empty or null");
             ((BuildListener) listener).finished(Result.FAILURE);
         }
         if (isEmpty(itemName)) {
-            listener.error("Item name is not specified", null);
+            listener.error("Item name is not specified");
             ((BuildListener) listener).finished(Result.FAILURE);
         }
 

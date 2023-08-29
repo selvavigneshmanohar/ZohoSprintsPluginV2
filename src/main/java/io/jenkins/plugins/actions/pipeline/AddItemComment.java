@@ -1,8 +1,6 @@
 package io.jenkins.plugins.actions.pipeline;
 
 import javax.annotation.Nonnull;
-
-import org.jenkinsci.plugins.workflow.steps.Step;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
@@ -11,24 +9,15 @@ import io.jenkins.plugins.Messages;
 import hudson.Extension;
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import io.jenkins.plugins.actions.ItemPipelineStep;
 import io.jenkins.plugins.actions.PipelineStepDescriptor;
 import io.jenkins.plugins.api.ItemAPI;
 
-public class AddItemComment extends Step {
-    private String prefix, note;
-
-    public String getPrefix() {
-        return prefix;
-    }
-
-    public String getNote() {
-        return note;
-    }
+public class AddItemComment extends ItemPipelineStep {
 
     @DataBoundConstructor
     public AddItemComment(String prefix, String note) {
-        this.prefix = prefix;
-        this.note = note;
+        super(prefix, note);
     }
 
     @Override
@@ -70,9 +59,8 @@ public class AddItemComment extends Step {
 
         @Override
         protected Void run() throws Exception {
-            new ItemAPI.ItemActionBuilder(step.prefix, getContext().get(Run.class),
-                    getContext().get(TaskListener.class))
-                    .withComment(step.note)
+            new ItemAPI.ItemActionBuilder(step.getPrefix(), getContext().get(Run.class),
+                    getContext().get(TaskListener.class), step.item)
                     .build()
                     .addComment();
             return null;

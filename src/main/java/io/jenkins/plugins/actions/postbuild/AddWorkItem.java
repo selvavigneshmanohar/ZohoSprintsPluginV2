@@ -6,133 +6,40 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import hudson.Extension;
 import hudson.Launcher;
-import hudson.matrix.MatrixAggregatable;
-import hudson.matrix.MatrixAggregator;
-import hudson.matrix.MatrixBuild;
-import hudson.matrix.MatrixRun;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
-import hudson.tasks.BuildStepMonitor;
-import hudson.tasks.Recorder;
 import hudson.util.FormValidation;
 import io.jenkins.plugins.api.ItemAPI;
 import io.jenkins.plugins.Messages;
+import io.jenkins.plugins.actions.ItemPostBuilder;
 import io.jenkins.plugins.actions.PostBuildDescriptor;
 
 import static org.apache.commons.lang.StringUtils.isEmpty;
 
-public class AddWorkItem extends Recorder implements MatrixAggregatable {
-    private String prefix, name, description, status, type, priority, duration, startdate, enddate, customFields,
-            assignee;
-
-    public String getAssignee() {
-        return assignee;
-    }
-
-    public String getPrefix() {
-        return prefix;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public String getPriority() {
-        return priority;
-    }
-
-    public String getDuration() {
-        return duration;
-    }
-
-    public String getStartdate() {
-        return startdate;
-    }
-
-    public String getEnddate() {
-        return enddate;
-    }
-
-    public String getCustomFields() {
-        return customFields;
-    }
+public class AddWorkItem extends ItemPostBuilder {
 
     @DataBoundConstructor
     public AddWorkItem(String prefix, String name, String description, String status, String type, String priority,
             String duration, String assignee, String startdate, String enddate, String customFields) {
-        this.prefix = prefix;
-        this.name = name;
-        this.description = description;
-        this.status = status;
-        this.type = type;
-        this.priority = priority;
-        this.assignee = assignee;
-        this.duration = duration;
-        this.startdate = startdate;
-        this.enddate = enddate;
-        this.customFields = customFields;
-    }
-
-    @Override
-    public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
-            throws InterruptedException, IOException {
-        if (build instanceof MatrixRun) {
-            return true;
-        }
-        return _perform(build, launcher, listener);
+        super(prefix, name, description, status, type, priority, duration, assignee, startdate, enddate, customFields);
+        // this.prefix = prefix;
+        // this.name = name;
+        // this.description = description;
+        // this.status = status;
+        // this.type = type;
+        // this.priority = priority;
+        // this.assignee = assignee;
+        // this.duration = duration;
+        // this.startdate = startdate;
+        // this.enddate = enddate;
+        // this.customFields = customFields;
     }
 
     public boolean _perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
             throws InterruptedException, IOException {
-        return new ItemAPI.ItemActionBuilder(prefix, build, listener)
-                .withName(name)
-                .withDescription(description)
-                .withStatus(status)
-                .withPriority(priority)
-                .withType(type)
-                .withDuration(duration)
-                .withComment(startdate)
-                .withEnddate(enddate)
-                .withAssignee(assignee)
-                .withCustomFields(customFields)
-                .build().create();
-    }
-
-    @Override
-    public BuildStepMonitor getRequiredMonitorService() {
-        return BuildStepMonitor.NONE;
-    }
-
-    @Override
-    public MatrixAggregator createAggregator(MatrixBuild build, Launcher launcher, BuildListener listener) {
-        return new MatrixAggregator(build, launcher, listener) {
-            @Override
-            public boolean endBuild() throws InterruptedException, IOException {
-                return AddWorkItem.this._perform(this.build, this.launcher, this.listener);
-            }
-
-            @Override
-            public boolean startBuild() throws InterruptedException, IOException {
-                return true;
-            }
-        };
-    }
-
-    @Override
-    public DescriptorImpl getDescriptor() {
-        return (DescriptorImpl) super.getDescriptor();
+        return new ItemAPI.ItemActionBuilder(prefix, build, listener, item)
+                .build()
+                .create();
     }
 
     @Extension

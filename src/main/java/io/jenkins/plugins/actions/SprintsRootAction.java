@@ -14,11 +14,12 @@ import io.jenkins.plugins.util.Util;
  */
 @Extension
 public class SprintsRootAction implements RootAction {
+    private static final String PLUGIN_RESOUCE_PATH = "/plugin/zohosprints/";
 
     @CheckForNull
     @Override
     public String getIconFileName() {
-        return Util.getSprintsIconByAuth();
+        return PLUGIN_RESOUCE_PATH + "sprints.svg";
     }
 
     @CheckForNull
