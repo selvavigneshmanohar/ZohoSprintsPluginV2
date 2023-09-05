@@ -21,6 +21,11 @@ public abstract class ReleasePipelineStepBuilder extends Step {
                 .setCustomFields(customFields);
     }
 
+    public ReleasePipelineStepBuilder(String prefix, String note) {
+        this.prefix = prefix;
+        release = Release.getInstance().setNote(note);
+    }
+
     public String getPrefix() {
         return prefix;
     }

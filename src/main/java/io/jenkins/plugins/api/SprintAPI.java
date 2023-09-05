@@ -16,8 +16,11 @@ import net.sf.json.JSONObject;
 public class SprintAPI {
     private static final Logger LOGGER = Logger.getLogger(SprintAPI.class.getName());
     private static final Pattern ZS_SPRINT = Pattern.compile("^(P|p)([0-9]+)#(s|S)([0-9]+)$");
+    private static final String SPRINTS_API = "/projects/no-$1/sprints/no-$2/";
+    private static final String START_SPRINT_API = SPRINTS_API + "start/";
+    private static final String COMPLETE_SPRINT_API = SPRINTS_API + "complete/";
+    private static final String ADD_SPRINT_COMMENT_API = SPRINTS_API + "notes/";
     private String comment;
-    private String api;
     private TaskListener listener;
     private Run<?, ?> build;
     private Integer projectNumber, sprintNumber;
@@ -30,7 +33,6 @@ public class SprintAPI {
         }
         this.build = build;
         this.listener = listener;
-        this.api = String.format("/projects/no-%s/sprints/no-%s/", this.projectNumber, this.sprintNumber);
     }
 
     public SprintAPI withComment(String comment) {
@@ -46,13 +48,17 @@ public class SprintAPI {
         return isNotValid;
     }
 
+    private ZohoClient getClient(String api, Map<String, Object> param) throws Exception {
+        return new ZohoClient(api, RequestClient.METHOD_POST, param, listener,
+                build, projectNumber.toString(), sprintNumber.toString());
+    }
+
     public boolean start() {
         if (isValidPrefixNumbers()) {
             return Boolean.FALSE;
         }
         try {
-            ZohoClient client = new ZohoClient(api + "start/", RequestClient.METHOD_POST, new HashMap<>(), listener,
-                    build);
+            ZohoClient client = getClient(START_SPRINT_API, new HashMap<>());
             client.execute();
             if (client.isSuccessRequest()) {
                 listener.getLogger().println(sprintsLogparser("Sprint has been started successfully", false));
@@ -72,8 +78,7 @@ public class SprintAPI {
         Map<String, Object> param = new HashMap<>();
         param.put("action", "complete");
         try {
-            ZohoClient client = new ZohoClient(api + "complete/", RequestClient.METHOD_POST, param, listener,
-                    build);
+            ZohoClient client = getClient(COMPLETE_SPRINT_API, param);
             String response = client.execute();
             if (client.isSuccessRequest()) {
                 JSONObject respObject = JSONObject.fromObject(response);
@@ -99,8 +104,7 @@ public class SprintAPI {
         Map<String, Object> param = new HashMap<>();
         param.put("name", this.comment);
         try {
-            ZohoClient client = new ZohoClient(api + "notes/", RequestClient.METHOD_POST, param, listener,
-                    build);
+            ZohoClient client = getClient(ADD_SPRINT_COMMENT_API, param);
             client.execute();
             if (client.isSuccessRequest()) {
                 listener.getLogger().println(sprintsLogparser("Comment added successfully", false));

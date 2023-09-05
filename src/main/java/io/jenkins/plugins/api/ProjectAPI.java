@@ -16,6 +16,7 @@ import static io.jenkins.plugins.util.Util.sprintsLogparser;
 public final class ProjectAPI {
     private static final Logger LOGGER = Logger.getLogger(ProjectAPI.class.getName());
     public static final Pattern ZS_PROJECT = Pattern.compile("^(P|p)([0-9]+)$");
+    private static final String FEED_PUSH_API = "/projects/no-$1/feed/status/";
     private String feed;
     private Integer projectNumber;
     private Run<?, ?> build;
@@ -34,11 +35,11 @@ public final class ProjectAPI {
             listener.error("Invalid Prefix");
             return Boolean.FALSE;
         }
-        String url = String.format("/projects/no-%s/feed/status/", projectNumber);
         Map<String, Object> param = new HashMap<>();
         param.put("name", feed);
         try {
-            ZohoClient client = new ZohoClient(url, RequestClient.METHOD_POST, param, listener, build);
+            ZohoClient client = new ZohoClient(FEED_PUSH_API, RequestClient.METHOD_POST, param, listener, build,
+                    projectNumber.toString());
             client.execute();
             if (client.isSuccessRequest()) {
                 listener.getLogger().println(sprintsLogparser("Feed status successfully added", false));

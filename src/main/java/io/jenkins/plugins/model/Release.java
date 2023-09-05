@@ -1,7 +1,16 @@
 package io.jenkins.plugins.model;
 
 public class Release {
-    private String name, goal, stage, startdate, enddate, customFields, owners;
+    private String name, goal, stage, startdate, enddate, customFields, owners, note;
+
+    public String getNote() {
+        return note;
+    }
+
+    public Release setNote(String note) {
+        this.note = note;
+        return this;
+    }
 
     public String getName() {
         return name;

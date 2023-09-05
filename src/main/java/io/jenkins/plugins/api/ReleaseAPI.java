@@ -5,6 +5,8 @@ import static io.jenkins.plugins.util.Util.replaceEnvVaribaleToValue;
 import static io.jenkins.plugins.util.Util.sprintsLogparser;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -21,9 +23,10 @@ import net.sf.json.JSONObject;
 
 public final class ReleaseAPI {
     private static final Logger LOGGER = Logger.getLogger(ReleaseAPI.class.getName());
-    private static final String CREATE_RELEASE = "/projects/no-%s/release/";
-    private static final String UPDATE_RELEASE = "/projects/no-%s/release/%sno-%s/update/";
-    private String api, name, owners, goal, stage, startdate, enddate, customFields;
+    private static final String CREATE_RELEASE_API = "/projects/no-$1/release/";
+    private static final String UPDATE_RELEASE_API = "/projects/no-$1/release/no-$2/update/";
+    private static final String ADD_COMMENT_API = "/projects/no-$1/release/no-$2/notes/";
+    private String name, owners, goal, stage, startdate, enddate, customFields, comment;
     private JSONArray ownerIds = null;
     private Integer projectNumber, releaseNumber;
     private Run<?, ?> build;
@@ -37,14 +40,11 @@ public final class ReleaseAPI {
         this.startdate = builder.release.getStartdate();
         this.enddate = builder.release.getEnddate();
         this.customFields = builder.release.getCustomFields();
+        this.comment = builder.release.getNote();
         this.projectNumber = builder.projectNumber;
         this.releaseNumber = builder.releaseNumber;
         this.build = builder.build;
         this.listener = builder.listener;
-        this.api = String.format(CREATE_RELEASE, builder.projectNumber);
-        if (builder.releaseNumber != null) {
-            this.api += String.format(UPDATE_RELEASE, this.api, builder.releaseNumber);
-        }
 
     }
 
@@ -72,7 +72,7 @@ public final class ReleaseAPI {
         param.put("statusName", envReplacer(stage));
         param.put("goal", envReplacer(goal));
         param.put("ownerIds", (ownerIds == null | ownerIds.isEmpty()) ? null : ownerIds);
-        return execute(param);
+        return execute(CREATE_RELEASE_API, param);
     }
 
     private boolean emptyCheck(String value) {
@@ -104,13 +104,36 @@ public final class ReleaseAPI {
             param.put("ownerIds", ownerIds);
         }
 
-        return execute(param);
+        return execute(UPDATE_RELEASE_API, param);
     }
 
-    private boolean execute(JSONObject param) throws IOException, InterruptedException {
+    public boolean addComment() {
+        if (projectNumber == null || releaseNumber == null) {
+            listener.error("Invalid Prefix");
+            return Boolean.FALSE;
+        }
+        Map<String, Object> param = new HashMap<>();
+        param.put("name", comment);
+        try {
+            ZohoClient client = new ZohoClient(ADD_COMMENT_API, RequestClient.METHOD_POST, param, listener, build,
+                    projectNumber.toString(), releaseNumber.toString());
+            client.execute();
+            if (client.isSuccessRequest()) {
+                listener.getLogger().println(sprintsLogparser("Comment added successfully", false));
+                return Boolean.TRUE;
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Error at add Work Item Comment", e);
+        }
+        return Boolean.FALSE;
+
+    }
+
+    private boolean execute(String api, JSONObject param) throws IOException, InterruptedException {
         Util.setCustomFields(customFields, param, null);
         try {
-            ZohoClient client = new ZohoClient(api, RequestClient.METHOD_POST, param, listener, build);
+            ZohoClient client = new ZohoClient(api, RequestClient.METHOD_POST, param, listener, build,
+                    projectNumber.toString(), releaseNumber.toString());
             client.execute();
             boolean isSuccessRequest = client.isSuccessRequest();
             if (isSuccessRequest) {

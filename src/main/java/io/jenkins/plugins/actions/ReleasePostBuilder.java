@@ -17,6 +17,11 @@ public abstract class ReleasePostBuilder extends PostBuild {
                 .setCustomFields(customFields);
     }
 
+    public ReleasePostBuilder(String prefix, String note) {
+        super(prefix);
+        release = Release.getInstance().setNote(note);
+    }
+
     public String getName() {
         return release.getName();
     }

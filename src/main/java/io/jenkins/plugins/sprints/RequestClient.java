@@ -31,12 +31,16 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -49,6 +53,7 @@ import static io.jenkins.plugins.util.Util.replaceEnvVaribaleToValue;;
 public class RequestClient {
 
     private static final Logger LOGGER = Logger.getLogger(RequestClient.class.getName());
+    private static final Pattern RELATIVE_URL_PATTERN = Pattern.compile("\\$(\\d{1,2})");
     public static final String METHOD_GET = "get";
     public static final String METHOD_POST = "post";
     public static final String METHOD_DELETE = "delete";
@@ -100,24 +105,38 @@ public class RequestClient {
      * @param frommethod Type of API call
      * @param fromparam  Query param of API
      */
-    public RequestClient(final String api, final String method, final Map<String, Object> param)
+    public RequestClient(final String api, final String method, final Map<String, Object> param, String[] urlParams)
             throws Exception {
         this.method = method;
         this.param = param;
-        setZSAPIDetails(api);
+        setZSAPIDetails(constructUri(api, urlParams));
     }
 
-    public RequestClient(final String api, final String method, final JSONObject param)
+    public RequestClient(final String api, final String method, final JSONObject param, String[] urlParams)
             throws Exception {
         this.method = method;
         this.bodyContent = param;
-        setZSAPIDetails(api);
+        setZSAPIDetails(constructUri(api, urlParams));
     }
 
     private HttpEntityEnclosingRequestBase setJSONBodyEntity(HttpEntityEnclosingRequestBase reqobject) {
         StringEntity entity = new StringEntity(bodyContent.toString(), "UTF-8");
         reqobject.setEntity(entity);
         return reqobject;
+    }
+
+    private String constructUri(String url, String urlParams[]) throws Exception {
+        if (urlParams == null) {
+            return url;
+        }
+        StringBuffer urlBuilder = new StringBuffer();
+        Matcher matcher = RELATIVE_URL_PATTERN.matcher(url);
+        while (matcher.find()) {
+            matcher.appendReplacement(urlBuilder,
+                    URLEncoder.encode(urlParams[Integer.parseInt(matcher.group(1)) - 1], StandardCharsets.UTF_8));
+        }
+        matcher.appendTail(urlBuilder);
+        return urlBuilder.toString();
     }
 
     /**

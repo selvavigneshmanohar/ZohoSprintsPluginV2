@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.Run;
@@ -22,6 +21,7 @@ import net.sf.json.JSONObject;
  * @version 1.0
  */
 public class Util {
+    private static final String GET_PROJECT_USER_API = "/projects/no-$1/user/details/";
 
     public static String replaceEnvVaribaleToValue(final AbstractBuild<?, ?> build, final BuildListener listener,
             final String key) throws IOException, InterruptedException {
@@ -51,11 +51,11 @@ public class Util {
     public static JSONArray getZSUserIds(int projectNumber, String mailIds, Run<?, ?> build, TaskListener listener)
             throws Exception {
         mailIds = replaceEnvVaribaleToValue(build, listener, mailIds);
-        String api = String.format("/projects/no-%s/user/details/", projectNumber);
         Map<String, Object> param = new HashMap<>();
         param.put("action", "projectusers");
         param.put("emailids", JSONArray.fromObject(mailIds.split(",")));
-        ZohoClient client = new ZohoClient(api, RequestClient.METHOD_GET, param, listener, build);
+        ZohoClient client = new ZohoClient(GET_PROJECT_USER_API, RequestClient.METHOD_GET, param, listener, build,
+                "" + projectNumber);
         String response = client.execute();
         if (!client.isSuccessRequest()) {
             JSONArray.fromObject(new Object[1]);

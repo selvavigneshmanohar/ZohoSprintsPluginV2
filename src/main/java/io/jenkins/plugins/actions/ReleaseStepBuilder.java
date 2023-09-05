@@ -1,5 +1,6 @@
 package io.jenkins.plugins.actions;
 
+import io.jenkins.plugins.model.Item;
 import io.jenkins.plugins.model.Release;
 
 public abstract class ReleaseStepBuilder extends BuildStep {
@@ -15,6 +16,11 @@ public abstract class ReleaseStepBuilder extends BuildStep {
                 .setStartdate(startdate)
                 .setEnddate(enddate)
                 .setCustomFields(customFields);
+    }
+
+    public ReleaseStepBuilder(String prefix, String note) {
+        super(prefix);
+        release = Release.getInstance().setNote(note);
     }
 
     public String getName() {

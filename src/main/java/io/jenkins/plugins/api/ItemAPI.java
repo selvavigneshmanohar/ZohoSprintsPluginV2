@@ -26,6 +26,9 @@ public final class ItemAPI {
     private static final Logger LOGGER = Logger.getLogger(ItemAPI.class.getName());
     public static final Pattern ZS_ADD_ITEM = Pattern.compile("^(P|p)([0-9]+)#(s|S)([0-9]+)$");
     public static final Pattern ZS_ITEM = Pattern.compile("^(P|p)([0-9]+)#(s|S)([0-9]+)#(i|I)([0-9]+)$");
+    private static final String CREATE_ITEM_API = "/projects/no-$1/sprints/no-$2/item/";
+    private static final String UPDATE_ITEM_API = "/projects/no-$1/sprints/no-$2/item/no-$3/";
+    private static final String ADD_ITEM_COMMENT_API = "/projects/no-$1/sprints/no-$2/item/no-$3/notes/";
     private String comment, name, description, status, type, priority, duration, startdate, enddate, customFields,
             assignee;
     private JSONArray zsuids = null;
@@ -57,12 +60,12 @@ public final class ItemAPI {
             listener.error("Invalid Prefix");
             return Boolean.FALSE;
         }
-        String url = String.format("/projects/no-%s/sprints/no-%s/item/no-%s/notes/", projectNumber, sprintNumber,
-                itemNumber);
         Map<String, Object> param = new HashMap<>();
         param.put("name", comment);
         try {
-            ZohoClient client = new ZohoClient(url, RequestClient.METHOD_POST, param, listener, build);
+            ZohoClient client = new ZohoClient(ADD_ITEM_COMMENT_API, RequestClient.METHOD_POST, param, listener, build,
+                    projectNumber.toString(), sprintNumber.toString(),
+                    itemNumber.toString());
             client.execute();
             if (client.isSuccessRequest()) {
                 listener.getLogger().println(sprintsLogparser("Comment added successfully", false));
@@ -89,8 +92,7 @@ public final class ItemAPI {
                 return Boolean.FALSE;
             }
         }
-        String url = String.format("/projects/no-%s/sprints/no-%s/item/", projectNumber, sprintNumber);
-        return execute("additem", url);
+        return execute("additem", CREATE_ITEM_API, projectNumber.toString(), sprintNumber.toString());
     }
 
     public boolean update() {
@@ -98,12 +100,11 @@ public final class ItemAPI {
             listener.error("Invalid Prefix");
             return Boolean.FALSE;
         }
-        String url = String.format("/projects/no-%s/sprints/no-%s/item/no-%s/", projectNumber, sprintNumber,
-                itemNumber);
-        return execute("updateitem", url);
+        return execute("updateitem", UPDATE_ITEM_API, projectNumber.toString(), sprintNumber.toString(),
+                itemNumber.toString());
     }
 
-    private boolean execute(String action, String url) {
+    private boolean execute(String action, String url, String... relativeURLParam) {
         Map<String, Object> param = new HashMap<>();
         boolean isupdate = itemNumber != null;
         param.put("action", action);
@@ -118,7 +119,8 @@ public final class ItemAPI {
         param.put("users", zsuids);
         Util.setCustomFields(customFields, null, param);
         try {
-            ZohoClient client = new ZohoClient(url, RequestClient.METHOD_POST, param, listener, build);
+            ZohoClient client = new ZohoClient(url, RequestClient.METHOD_POST, param, listener, build,
+                    relativeURLParam);
             client.execute();
             if (client.isSuccessRequest()) {
                 listener.getLogger()
@@ -133,12 +135,6 @@ public final class ItemAPI {
     }
 
     public static class ItemActionBuilder {
-        /*
-         * private String comment = null, name = null, description = null, status =
-         * null, type = null, priority = null,
-         * duration = null, startdate = null, enddate = null, customFields = null,
-         * prefix = null, assignee = null;
-         */
         private String prefix;
         private Item item;
 

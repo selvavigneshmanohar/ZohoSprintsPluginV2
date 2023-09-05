@@ -20,16 +20,16 @@ public class ZohoClient {
     private int responsecode;
 
     public ZohoClient(String api, String method, Map<String, Object> queryParam, TaskListener listener,
-            Run<?, ?> build) throws Exception {
+            Run<?, ?> build, String... relativeUrlParams) throws Exception {
         this.listener = listener;
-        this.client = new RequestClient(api, method, queryParam)
+        this.client = new RequestClient(api, method, queryParam, relativeUrlParams)
                 .setListener(listener).setBuild(build);
     }
 
     public ZohoClient(String api, String method, JSONObject body, TaskListener listener,
-            Run<?, ?> build) throws Exception {
+            Run<?, ?> build, String... relativeUrlParams) throws Exception {
         this.listener = listener;
-        this.client = new RequestClient(api, method, body)
+        this.client = new RequestClient(api, method, body, relativeUrlParams)
                 .setListener(listener).setBuild(build);
     }
 
@@ -79,7 +79,7 @@ public class ZohoClient {
         param.put("redirect_uri", config.getRedirectURL());
         RequestClient requestClient = new RequestClient(config.getAccountsDomain() + "/oauth/v2/token",
                 RequestClient.METHOD_POST,
-                param);
+                param, null);
         String resp = requestClient.execute();
         if (resp != null && !resp.isEmpty() && resp.startsWith("{")) {
             JSONObject respObj = JSONObject.fromObject(resp);
