@@ -6,7 +6,7 @@ import java.util.Objects;
 
 public class ZSConnection {
     private String accountsDomain, serviceDomain, serviceAPIDomain;
-    private String zoid, clientId, clientSecret, redirectURL, refreshToken, zsheader;
+    private String zoid, clientId, clientSecret, redirectURL, refreshToken;
 
     public void setAccountsDomain(String accountsDomain) {
         this.accountsDomain = Objects.requireNonNull(accountsDomain, "Accounts domain should not be null");
@@ -38,10 +38,6 @@ public class ZSConnection {
 
     public void setRefreshToken(String refreshToken) {
         this.refreshToken = Objects.requireNonNull(refreshToken, "Refresh token should not be null");
-    }
-
-    public void setZsheader(String zsheader) {
-        this.zsheader = Objects.requireNonNull(zsheader, "Header should not be null");
     }
 
     public ZSConnection() {
@@ -79,10 +75,6 @@ public class ZSConnection {
         return refreshToken;
     }
 
-    public String getZSheader() {
-        return zsheader;
-    }
-
     /**
      * Checking all the values are not null and empty string
      * 
@@ -90,7 +82,6 @@ public class ZSConnection {
      */
     public boolean isValid() {
         return !(isEmpty(accountsDomain) || isEmpty(serviceDomain) || isEmpty(serviceAPIDomain) || isEmpty(zoid)
-                || isEmpty(clientId) || isEmpty(clientSecret) || isEmpty(redirectURL) || isEmpty(refreshToken)
-                || isEmpty(zsheader));
+                || isEmpty(clientId) || isEmpty(clientSecret) || isEmpty(redirectURL) || isEmpty(refreshToken));
     }
 }

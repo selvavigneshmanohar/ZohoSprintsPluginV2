@@ -49,4 +49,8 @@ public abstract class ReleasePostBuilder extends PostBuild {
     public String getOwners() {
         return release.getOwners();
     }
+
+    public String getNote() {
+        return release.getNote();
+    }
 }

@@ -22,17 +22,6 @@ public class AddWorkItem extends ItemPostBuilder {
     public AddWorkItem(String prefix, String name, String description, String status, String type, String priority,
             String duration, String assignee, String startdate, String enddate, String customFields) {
         super(prefix, name, description, status, type, priority, duration, assignee, startdate, enddate, customFields);
-        // this.prefix = prefix;
-        // this.name = name;
-        // this.description = description;
-        // this.status = status;
-        // this.type = type;
-        // this.priority = priority;
-        // this.assignee = assignee;
-        // this.duration = duration;
-        // this.startdate = startdate;
-        // this.enddate = enddate;
-        // this.customFields = customFields;
     }
 
     public boolean _perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)

@@ -14,7 +14,6 @@ import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.util.FormValidation;
 import io.jenkins.plugins.Messages;
-import io.jenkins.plugins.actions.ItemPostBuilder;
 import io.jenkins.plugins.actions.PostBuildDescriptor;
 import io.jenkins.plugins.actions.ReleasePostBuilder;
 import io.jenkins.plugins.api.ReleaseAPI;
@@ -34,7 +33,7 @@ public class AddReleaseComment extends ReleasePostBuilder {
                 .addComment();
     }
 
-    @Extension
+    // @Extension
     public static class DescriptorImpl extends PostBuildDescriptor {
 
         public FormValidation doCheckNote(@QueryParameter final String note) {

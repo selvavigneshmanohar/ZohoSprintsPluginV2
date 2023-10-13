@@ -38,7 +38,7 @@ public class ZohoClient {
     }
 
     public boolean isSuccessRequest() {
-        return responsecode == HttpServletResponse.SC_OK;
+        return responsecode == HttpServletResponse.SC_OK || responsecode == HttpServletResponse.SC_CREATED;
     }
 
     public String execute() throws Exception {
@@ -47,12 +47,14 @@ public class ZohoClient {
         if (isOAuthExpired(response)) {
             generateNewAccessToken();
             response = client.execute();
-            responsecode = client.getResponsecode();
         }
-        if (responsecode != HttpServletResponse.SC_OK) {
-            listener.error(JSONObject.fromObject(response).toString());
+        responsecode = client.getResponsecode();
+        if (isSuccessRequest()) {
+            return response;
         }
+        listener.error(JSONObject.fromObject(response).toString());
         return response;
+
     }
 
     private boolean isOAuthExpired(String response) {
@@ -67,7 +69,7 @@ public class ZohoClient {
         }
     }
 
-    public static void generateNewAccessToken() throws Exception {
+    public static synchronized void generateNewAccessToken() throws Exception {
         ZSConnectionConfiguration config = Util.getZSConnection();
         logger.info("New Token method called");
         Map<String, Object> param = new HashMap<>();

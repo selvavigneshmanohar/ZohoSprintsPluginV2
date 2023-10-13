@@ -68,7 +68,7 @@ public final class ItemAPI {
                     itemNumber.toString());
             client.execute();
             if (client.isSuccessRequest()) {
-                listener.getLogger().println(sprintsLogparser("Comment added successfully", false));
+                listener.getLogger().println(sprintsLogparser("Work Item Comment added successfully", false));
                 return Boolean.TRUE;
             }
         } catch (Exception e) {
@@ -83,7 +83,7 @@ public final class ItemAPI {
             listener.error("Invalid Prefix");
             return Boolean.FALSE;
         }
-        if (assignee != null) {
+        if (assignee != null && !assignee.trim().isEmpty()) {
             try {
                 this.zsuids = getZSUserIds(projectNumber, assignee, build, listener);
             } catch (Exception e) {

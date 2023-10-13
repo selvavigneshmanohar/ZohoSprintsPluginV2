@@ -29,21 +29,6 @@ public class AddWorkItem extends ItemStepBuilder {
         return new ItemAPI.ItemActionBuilder(prefix, build, listener, item)
                 .build()
                 .create();
-        /*
-         * return new ItemAPI.ItemActionBuilder(prefix, build, listener)
-         * .withName(name)
-         * .withDescription(description)
-         * .withStatus(status)
-         * .withPriority(priority)
-         * .withType(type)
-         * .withAssignee(assignee)
-         * .withDuration(duration)
-         * .withComment(startdate)
-         * .withEnddate(enddate)
-         * .withCustomFields(customFields)
-         * .build()
-         * .create();
-         */
     }
 
     @Extension

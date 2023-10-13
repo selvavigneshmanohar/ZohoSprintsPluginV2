@@ -12,33 +12,30 @@ import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import io.jenkins.plugins.Messages;
 import io.jenkins.plugins.actions.PostBuildDescriptor;
-import io.jenkins.plugins.actions.ReleasePostBuilder;
-import io.jenkins.plugins.api.ReleaseAPI;
+import io.jenkins.plugins.actions.SprintsPostBuilder;
+import io.jenkins.plugins.api.SprintAPI;
 
-public class CreateRelease extends ReleasePostBuilder {
-
+public class UpdateSprint extends SprintsPostBuilder {
     @DataBoundConstructor
-    public CreateRelease(String prefix, String name, String owners, String goal, String stage, String startdate,
-            String enddate, String customFields) {
-        super(prefix, name, owners, goal, stage, startdate, enddate, customFields);
+    public UpdateSprint(String prefix, String name, String description, String duration, String startdate,
+            String enddate) {
+        super(prefix, name, description, duration, startdate, enddate);
     }
 
     @Override
     public boolean _perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
             throws InterruptedException, IOException {
-        return new ReleaseAPI.ReleaseAPIBuilder(prefix, build, listener, release)
-                .build()
-                .create();
-
+        return new SprintAPI(prefix, listener, build)
+                .update(sprint);
     }
 
     @Extension
     public static class DescriptorImpl extends PostBuildDescriptor {
-
         @Nonnull
         @Override
         public String getDisplayName() {
-            return Messages.release_create();
+            return Messages.sprint_update();
         }
     }
+
 }

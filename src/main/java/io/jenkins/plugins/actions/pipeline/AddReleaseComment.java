@@ -26,7 +26,7 @@ public class AddReleaseComment extends ReleasePipelineStepBuilder {
         return new AddReleaseCommentExecutor(this, context);
     }
 
-    @Extension(optional = true)
+    // @Extension(optional = true)
     public static final class DescriptorImpl extends PipelineStepDescriptor {
 
         /**

@@ -1,6 +1,7 @@
 package io.jenkins.plugins.actions;
 
 import java.io.IOException;
+import java.util.function.Function;
 
 import hudson.Launcher;
 import hudson.matrix.MatrixAggregatable;

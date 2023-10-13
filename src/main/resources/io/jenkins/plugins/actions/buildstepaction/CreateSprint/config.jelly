@@ -1,0 +1,38 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+        <f:entry title="Prefix" field="prefix">
+          <f:textbox />
+        </f:entry>
+        <f:entry title="Sprint Name" field="name">
+          <f:textbox />
+        </f:entry>
+        <f:entry title="Description" field="description">
+          <f:textbox />
+        </f:entry>
+        <f:entry title="Duration" field="duration">
+          <f:textbox />
+        </f:entry>
+        <f:entry title="Start Date" field="startdate">
+          <f:textbox />
+        </f:entry>
+        <f:entry title="End Date" field="enddate">
+          <f:textbox />
+        </f:entry>
+       <!-- <f:entry title="Duration Type" field="durationType" >
+            <f:select name="durationType"/>
+            </f:select>
+        </f:entry>
+         <j:if test="${it.isDurationSelected(instance.durationType) == true}">
+            <f:entry title="Duration" field="duration">
+            <f:textbox />
+            </f:entry>
+        </j:if>
+         <j:if test="${it.durationType.value == 'date'}">
+            <f:entry title="Start Date" field="startdate">
+            <f:textbox />
+            </f:entry>
+            <f:entry title="End Date" field="enddate">
+            <f:textbox />
+            </f:entry>
+         </j:if> -->
+</j:jelly>

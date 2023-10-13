@@ -38,13 +38,5 @@ public class UpdateRelease extends ReleasePostBuilder {
         public String getDisplayName() {
             return Messages.release_update();
         }
-
-        public FormValidation doCheckPrefix(@QueryParameter final String goal) {
-            return FormValidation.validateRequired(goal);
-        }
-
-        public FormValidation doCheckStage(@QueryParameter final String stage) {
-            return FormValidation.validateRequired(stage);
-        }
     }
 }

@@ -1,6 +1,5 @@
 package io.jenkins.plugins.actions;
 
-import io.jenkins.plugins.model.Item;
 import io.jenkins.plugins.model.Release;
 
 public abstract class ReleaseStepBuilder extends BuildStep {
@@ -49,5 +48,9 @@ public abstract class ReleaseStepBuilder extends BuildStep {
 
     public String getOwners() {
         return release.getOwners();
+    }
+
+    public String getNote() {
+        return release.getNote();
     }
 }

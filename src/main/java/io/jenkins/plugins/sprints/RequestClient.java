@@ -133,7 +133,8 @@ public class RequestClient {
         Matcher matcher = RELATIVE_URL_PATTERN.matcher(url);
         while (matcher.find()) {
             matcher.appendReplacement(urlBuilder,
-                    URLEncoder.encode(urlParams[Integer.parseInt(matcher.group(1)) - 1], StandardCharsets.UTF_8));
+                    URLEncoder.encode(urlParams[Integer.parseInt(matcher.group(1)) - 1],
+                            StandardCharsets.UTF_8.name()));
         }
         matcher.appendTail(urlBuilder);
         return urlBuilder.toString();

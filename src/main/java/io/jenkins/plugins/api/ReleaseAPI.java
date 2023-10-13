@@ -71,7 +71,7 @@ public final class ReleaseAPI {
         param.put("enddate", envReplacer(enddate));
         param.put("statusName", envReplacer(stage));
         param.put("goal", envReplacer(goal));
-        param.put("ownerIds", (ownerIds == null | ownerIds.isEmpty()) ? null : ownerIds);
+        param.put("ownerIds", (ownerIds == null || ownerIds.isEmpty()) ? null : ownerIds);
         return execute(CREATE_RELEASE_API, param);
     }
 
@@ -119,11 +119,11 @@ public final class ReleaseAPI {
                     projectNumber.toString(), releaseNumber.toString());
             client.execute();
             if (client.isSuccessRequest()) {
-                listener.getLogger().println(sprintsLogparser("Comment added successfully", false));
+                listener.getLogger().println(sprintsLogparser("Release Comment added successfully", false));
                 return Boolean.TRUE;
             }
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Error at add Work Item Comment", e);
+            LOGGER.log(Level.WARNING, "Error at add Release Comment", e);
         }
         return Boolean.FALSE;
 
@@ -133,13 +133,24 @@ public final class ReleaseAPI {
         Util.setCustomFields(customFields, param, null);
         try {
             ZohoClient client = new ZohoClient(api, RequestClient.METHOD_POST, param, listener, build,
-                    projectNumber.toString(), releaseNumber.toString());
-            client.execute();
+                    projectNumber.toString(), releaseNumber == null ? null : releaseNumber.toString());
+            String response = client.execute();
             boolean isSuccessRequest = client.isSuccessRequest();
-            if (isSuccessRequest) {
-                listener.getLogger().println(sprintsLogparser(
-                        releaseNumber != null ? "Release has been updated" : "Release has been added", false));
+            String message = null;
+            if (releaseNumber == null && isSuccessRequest) {
+                message = JSONObject.fromObject(response).optString("message", null);
+                if (message == null) {
+                    listener.getLogger().println(sprintsLogparser("Release has been added", false));
+                }
+                return isSuccessRequest;
+            } else if (releaseNumber != null && isSuccessRequest) {
+                message = JSONObject.fromObject(response).optString("i18nMessage", null);
+                if (message == null) {
+                    listener.getLogger().println(sprintsLogparser("Release has been updated", false));
+                }
+                return isSuccessRequest;
             }
+            listener.error(sprintsLogparser(message, true));
             return isSuccessRequest;
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Error", e);
@@ -153,7 +164,7 @@ public final class ReleaseAPI {
         private Run<?, ?> build;
         private TaskListener listener;
         private Release release;
-        public static final Pattern ZS_RELEASE = Pattern.compile("^(P|p)([0-9]+)(#(r|IR)([0-9]+))?$");
+        public static final Pattern ZS_RELEASE = Pattern.compile("^(P|p)([0-9]+)(#(r|R)([0-9]+))?$");
 
         private String getEnvVaribaleToValue(String key) throws IOException, InterruptedException {
             return replaceEnvVaribaleToValue(build, listener, key);
@@ -211,8 +222,10 @@ public final class ReleaseAPI {
             Matcher matcher = ZS_RELEASE.matcher(prefix);
             if (matcher.matches()) {
                 this.projectNumber = Integer.parseInt(matcher.group(2));
-                this.releaseNumber = matcher.group(4) == null ? null : Integer.parseInt(matcher.group(4));
+                this.releaseNumber = matcher.group(5) == null ? null : Integer.parseInt(matcher.group(5));
             }
+            LOGGER.info(matcher.group(5));
+            LOGGER.info(matcher.group(4));
             return new ReleaseAPI(this);
         }
     }
