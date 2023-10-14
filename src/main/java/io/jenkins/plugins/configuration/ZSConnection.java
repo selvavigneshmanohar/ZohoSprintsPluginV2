@@ -1,6 +1,6 @@
 package io.jenkins.plugins.configuration;
 
-import static org.apache.commons.lang.StringUtils.isEmpty;
+import static io.jenkins.plugins.util.Util.isEmpty;
 
 import java.util.Objects;
 

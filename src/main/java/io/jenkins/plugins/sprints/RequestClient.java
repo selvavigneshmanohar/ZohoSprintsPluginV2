@@ -1,32 +1,5 @@
 package io.jenkins.plugins.sprints;
 
-import hudson.ProxyConfiguration;
-import hudson.model.Run;
-import hudson.model.TaskListener;
-import hudson.util.Secret;
-import io.jenkins.plugins.configuration.ZSConnectionConfiguration;
-import io.jenkins.plugins.util.Util;
-import jenkins.model.Jenkins;
-import net.sf.json.JSONObject;
-
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpHost;
-import org.apache.http.NameValuePair;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.CredentialsProvider;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.*;
-import org.apache.http.client.utils.URLEncodedUtils;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.ProxyAuthenticationStrategy;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,7 +17,35 @@ import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletResponse;
 
-import static io.jenkins.plugins.util.Util.replaceEnvVaribaleToValue;;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpHost;
+import org.apache.http.NameValuePair;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.ProxyAuthenticationStrategy;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
+
+import hudson.ProxyConfiguration;
+import hudson.util.Secret;
+import io.jenkins.plugins.configuration.ZSConnectionConfiguration;
+import io.jenkins.plugins.util.Util;
+import jenkins.model.Jenkins;
+import net.sf.json.JSONObject;;
 
 /**
  * @author selvavignesh.m
@@ -56,71 +57,43 @@ public class RequestClient {
     private static final Pattern RELATIVE_URL_PATTERN = Pattern.compile("\\$(\\d{1,2})");
     public static final String METHOD_GET = "get";
     public static final String METHOD_POST = "post";
-    public static final String METHOD_DELETE = "delete";
     public static final String CHARSET = "UTF-8";
-    private String url = null;
-    private String method = null;
-    private Map<String, Object> param = new HashMap<>();
+    private String url;
+    private String method;
+    private Map<String, Object> queryParam = new HashMap<>();
+
     private Map<String, String> header = new HashMap<>();
     private boolean isJSONBodyContent;
-    private Object bodyContent = null;
-    private TaskListener listener = null;
-    private Run<?, ?> build = null;
     private int responsecode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 
     public int getResponsecode() {
         return responsecode;
     }
 
-    public RequestClient setListener(TaskListener listener) {
-        this.listener = listener;
-        return this;
-    }
-
-    public RequestClient setBuild(Run<?, ?> build) {
-        this.build = build;
-        return this;
-    }
-
-    /**
-     * @param paramMap Query param of API
-     * @return Instance of Class
-     */
-    public RequestClient setParam(final Map<String, Object> paramMap) {
-        this.param = paramMap;
-        return this;
-    }
-
-    /**
-     * @param jsonBodyContent JSONType param
-     * @return Instance of Class
-     */
     public RequestClient setJSONBodyContent(final boolean jsonBodyContent) {
         isJSONBodyContent = jsonBodyContent;
         return this;
     }
 
-    /**
-     * @param fromurl    Sprints API
-     * @param frommethod Type of API call
-     * @param fromparam  Query param of API
-     */
-    public RequestClient(final String api, final String method, final Map<String, Object> param, String[] urlParams)
+    public RequestClient(final String api, final String method, String[] urlParams)
             throws Exception {
         this.method = method;
-        this.param = param;
         setZSAPIDetails(constructUri(api, urlParams));
     }
 
-    public RequestClient(final String api, final String method, final JSONObject param, String[] urlParams)
-            throws Exception {
-        this.method = method;
-        this.bodyContent = param;
-        setZSAPIDetails(constructUri(api, urlParams));
+    public RequestClient setQueryParam(Map<String, Object> queryParam) {
+        this.queryParam = queryParam;
+        return this;
+    }
+
+    public RequestClient addParameter(String key, Object value) {
+        queryParam.put(key, value);
+        return this;
     }
 
     private HttpEntityEnclosingRequestBase setJSONBodyEntity(HttpEntityEnclosingRequestBase reqobject) {
-        StringEntity entity = new StringEntity(bodyContent.toString(), "UTF-8");
+        LOGGER.info(JSONObject.fromObject(queryParam).toString());
+        StringEntity entity = new StringEntity(JSONObject.fromObject(queryParam).toString(), CHARSET);
         reqobject.setEntity(entity);
         return reqobject;
     }
@@ -140,16 +113,12 @@ public class RequestClient {
         return urlBuilder.toString();
     }
 
-    /**
-     * @return HttpUriRequest function
-     * @throws Exception Throws when any error occurs
-     */
     private HttpUriRequest getMethod() throws Exception {
 
         if (method != null) {
             if (method.equals(METHOD_GET)) {
                 HttpGet get = new HttpGet(url);
-                if (!param.isEmpty()) {
+                if (!queryParam.isEmpty()) {
                     get = constructUrl(get);
                 }
                 return get;
@@ -162,11 +131,6 @@ public class RequestClient {
         return null;
     }
 
-    /**
-     * @param httpreq httpUriRequest Object
-     * @return HttpUriRequest function
-     * @throws Exception Throws when any error occurs
-     */
     private HttpUriRequest setHeader(HttpUriRequest httpreq) throws Exception {
         Map<String, String> headerMap = this.header;
 
@@ -195,6 +159,8 @@ public class RequestClient {
      * @throws Exception Throws when any error occurs
      */
     public String execute() throws Exception {
+        LOGGER.info(queryParam.toString());
+        LOGGER.info(JSONObject.fromObject(queryParam).toString());
         int connectionTimeOut = 30000;
         int socketTimeOut = 30000;
         String resp = "";
@@ -266,7 +232,7 @@ public class RequestClient {
      */
     private HttpGet constructUrl(HttpGet get) {
         List<NameValuePair> list = new ArrayList<>();
-        for (Map.Entry<String, Object> entry : param.entrySet()) {
+        for (Map.Entry<String, Object> entry : queryParam.entrySet()) {
             String key = entry.getKey();
             Object value = entry.getValue();
             if (value != null) {
@@ -283,20 +249,19 @@ public class RequestClient {
      */
     private void setEntity(HttpPost post) throws UnsupportedEncodingException, IOException, InterruptedException {
 
-        if (param != null && !param.isEmpty()) {
+        if (!isJSONBodyContent && queryParam != null && !queryParam.isEmpty()) {
             List<NameValuePair> entityList = new ArrayList<>();
-            for (Map.Entry<String, Object> entry : param.entrySet()) {
+            for (Map.Entry<String, Object> entry : queryParam.entrySet()) {
                 Object value = entry.getValue();
                 if (value != null && value.toString().length() > 0) {
                     entityList.add(new BasicNameValuePair(entry.getKey(),
-                            (build != null && listener != null)
-                                    ? replaceEnvVaribaleToValue(build, listener, value.toString())
+                            buildUtility != null ? buildUtility.replaceEnvVaribaleToValue(value.toString())
                                     : value.toString()));
                 }
 
             }
             post.setEntity(new UrlEncodedFormEntity(entityList));
-        } else if (bodyContent != null) {
+        } else if (isJSONBodyContent && !queryParam.isEmpty()) {
             setJSONBodyEntity(post);
         }
 

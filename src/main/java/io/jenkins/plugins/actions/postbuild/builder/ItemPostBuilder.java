@@ -1,19 +1,16 @@
-package io.jenkins.plugins.actions;
+package io.jenkins.plugins.actions.postbuild.builder;
 
 import io.jenkins.plugins.model.Item;
 
 public abstract class ItemPostBuilder extends PostBuild {
-    protected Item item;
 
     public ItemPostBuilder(String prefix, String note) {
-        super(prefix);
-        item = Item.getInstance().setNote(note);
+        super(Item.getInstance(prefix).setNote(note));
     }
 
     public ItemPostBuilder(String prefix, String name, String description, String status, String type, String priority,
             String duration, String assignee, String startdate, String enddate, String customFields) {
-        super(prefix);
-        item = Item.getInstance().setName(name)
+        super(Item.getInstance(prefix).setName(name)
                 .setDescription(description)
                 .setStatus(status)
                 .setType(type)
@@ -22,51 +19,55 @@ public abstract class ItemPostBuilder extends PostBuild {
                 .setAssignee(assignee)
                 .setStartdate(startdate)
                 .setEnddate(enddate)
-                .setCustomFields(customFields);
+                .setCustomFields(customFields));
+    }
+
+    public Item getForm() {
+        return (Item) super.getForm();
     }
 
     public String getAssignee() {
-        return item.getAssignee();
+        return getForm().getAssignee();
     }
 
     public String getName() {
-        return item.getName();
+        return getForm().getName();
     }
 
     public String getDescription() {
-        return item.getDescription();
+        return getForm().getDescription();
     }
 
     public String getStatus() {
-        return item.getStatus();
+        return getForm().getStatus();
     }
 
     public String getType() {
-        return item.getType();
+        return getForm().getType();
     }
 
     public String getPriority() {
-        return item.getPriority();
+        return getForm().getPriority();
     }
 
     public String getDuration() {
-        return item.getDuration();
+        return getForm().getDuration();
     }
 
     public String getStartdate() {
-        return item.getStartdate();
+        return getForm().getStartdate();
     }
 
     public String getEnddate() {
-        return item.getEnddate();
+        return getForm().getEnddate();
     }
 
     public String getCustomFields() {
-        return item.getCustomFields();
+        return getForm().getCustomFields();
     }
 
     public String getNote() {
-        return item.getNote();
+        return getForm().getNote();
     }
 
 }

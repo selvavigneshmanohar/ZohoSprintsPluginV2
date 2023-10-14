@@ -1,4 +1,4 @@
-package io.jenkins.plugins.actions;
+package io.jenkins.plugins.actions.pipeline.descriptor;
 
 import java.util.Collections;
 import java.util.HashSet;

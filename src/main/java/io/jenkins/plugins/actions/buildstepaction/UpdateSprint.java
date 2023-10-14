@@ -1,19 +1,15 @@
 package io.jenkins.plugins.actions.buildstepaction;
 
-import java.io.IOException;
-
-import javax.annotation.Nonnull;
+import java.util.function.Function;
 
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import hudson.Extension;
-import hudson.Launcher;
-import hudson.model.AbstractBuild;
-import hudson.model.BuildListener;
 import io.jenkins.plugins.Messages;
-import io.jenkins.plugins.actions.BuildStepDescriptorImpl;
-import io.jenkins.plugins.actions.SprintsStepBuilder;
+import io.jenkins.plugins.actions.buildstepaction.builder.SprintsStepBuilder;
+import io.jenkins.plugins.actions.buildstepaction.descriptor.BuildStepDescriptorImpl;
 import io.jenkins.plugins.api.SprintAPI;
+import io.jenkins.plugins.model.Sprint;
 
 public class UpdateSprint extends SprintsStepBuilder {
     @DataBoundConstructor
@@ -23,15 +19,14 @@ public class UpdateSprint extends SprintsStepBuilder {
     }
 
     @Override
-    public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
-            throws InterruptedException, IOException {
-        return new SprintAPI(prefix, listener, build)
-                .update(sprint);
+    public String perform(Function<String, String> getValueFromEnviroinmentValue) throws Exception {
+        Sprint sprint = getForm();
+        sprint.setEnviroinmentVaribaleReplacer(getValueFromEnviroinmentValue);
+        return SprintAPI.getInstance().update(sprint);
     }
 
     @Extension
     public static class DescriptorImpl extends BuildStepDescriptorImpl {
-        @Nonnull
         @Override
         public String getDisplayName() {
             return Messages.sprint_update();

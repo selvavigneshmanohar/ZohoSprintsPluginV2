@@ -9,7 +9,7 @@
     </parent>
     <groupId>io.jenkins.plugins</groupId>
     <artifactId>zohosprintsv2</artifactId>
-    <version>1.0</version>
+    <version>1.3</version>
     <packaging>hpi</packaging>
     <name>Zoho Sprints</name>
     <description>Plugin which wil help to do action from jenkins while running the job</description>

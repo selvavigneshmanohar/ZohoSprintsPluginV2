@@ -1,38 +1,28 @@
 package io.jenkins.plugins.actions.pipeline;
 
-import javax.annotation.Nonnull;
-import org.jenkinsci.plugins.workflow.steps.Step;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
-import org.jenkinsci.plugins.workflow.steps.StepExecution;
-import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
+
 import hudson.Extension;
-import hudson.model.Run;
-import hudson.model.TaskListener;
 import io.jenkins.plugins.Messages;
-import io.jenkins.plugins.actions.PipelineStepDescriptor;
-import io.jenkins.plugins.api.ProjectAPI;
+import io.jenkins.plugins.actions.pipeline.descriptor.PipelineStepDescriptor;
+import io.jenkins.plugins.actions.pipeline.executor.PipelineStepExecutor;
+import io.jenkins.plugins.actions.pipeline.step.PipelineStep;
+import io.jenkins.plugins.api.FeedStatusAPI;
+import io.jenkins.plugins.model.FeedStatus;
 
-public class AddFeedStatus extends Step {
-    private String prefix, feed;
-
-    public String getPrefix() {
-        return prefix;
+public class AddFeedStatus extends PipelineStep {
+    @DataBoundConstructor
+    public AddFeedStatus(String prefix, String feed) {
+        super(FeedStatus.getInstance(prefix, feed));
     }
 
     public String getFeed() {
-        return feed;
+        return getForm().getFeed();
     }
 
-    @DataBoundConstructor
-    public AddFeedStatus(String prefix, String feed) {
-        this.prefix = prefix;
-        this.feed = feed;
-    }
-
-    @Override
-    public StepExecution start(StepContext context) throws Exception {
-        return new AddFeedStatusExecutor(this, context);
+    public FeedStatus getForm() {
+        return (FeedStatus) super.getForm();
     }
 
     @Extension(optional = true)
@@ -42,27 +32,22 @@ public class AddFeedStatus extends Step {
             return "sprintsAddFeedStatus";
         }
 
-        @Nonnull
         @Override
         public String getDisplayName() {
             return Messages.add_feed_status();
         }
     }
 
-    public static class AddFeedStatusExecutor extends SynchronousNonBlockingStepExecution<Void> {
-        private static final long serialVersionUID = 1L;
-        private final transient AddFeedStatus step;
+    public static class AddFeedStatusExecutor extends PipelineStepExecutor {
 
-        protected AddFeedStatusExecutor(AddFeedStatus step, @Nonnull StepContext context) {
-            super(context);
-            this.step = step;
+        protected AddFeedStatusExecutor(FeedStatus form, StepContext context) {
+            super(form, context);
         }
 
         @Override
-        protected Void run() throws Exception {
-            new ProjectAPI(step.prefix, step.feed, getContext().get(Run.class),
-                    getContext().get(TaskListener.class)).addFeed();
-            return null;
+        protected String execute() throws Exception {
+            return new FeedStatusAPI().addFeed((FeedStatus) form);
         }
+
     }
 }

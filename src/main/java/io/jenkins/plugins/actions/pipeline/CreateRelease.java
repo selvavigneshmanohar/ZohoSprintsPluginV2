@@ -1,32 +1,24 @@
 package io.jenkins.plugins.actions.pipeline;
 
-import javax.annotation.Nonnull;
-
-import org.jenkinsci.plugins.workflow.steps.Step;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
-import org.jenkinsci.plugins.workflow.steps.StepExecution;
-import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
-import hudson.Extension;
-import hudson.model.Run;
-import hudson.model.TaskListener;
-import io.jenkins.plugins.Messages;
-import io.jenkins.plugins.actions.PipelineStepDescriptor;
-import io.jenkins.plugins.actions.ReleasePipelineStepBuilder;
-import io.jenkins.plugins.api.ReleaseAPI;
 
-public class CreateRelease extends ReleasePipelineStepBuilder {
+import hudson.Extension;
+import io.jenkins.plugins.Messages;
+import io.jenkins.plugins.actions.pipeline.descriptor.PipelineStepDescriptor;
+import io.jenkins.plugins.actions.pipeline.executor.PipelineStepExecutor;
+import io.jenkins.plugins.actions.pipeline.step.ReleasePipelineStep;
+import io.jenkins.plugins.api.ReleaseAPI;
+import io.jenkins.plugins.model.BaseModel;
+import io.jenkins.plugins.model.Release;
+
+public class CreateRelease extends ReleasePipelineStep {
 
     @DataBoundConstructor
     public CreateRelease(String prefix, String name, String owners, String goal, String stage, String owner,
             String startdate,
             String enddate, String customFields) {
         super(prefix, name, owners, goal, stage, startdate, enddate, customFields);
-    }
-
-    @Override
-    public StepExecution start(StepContext context) throws Exception {
-        return new CreateReleaseExecutor(this, context);
     }
 
     @Extension(optional = true)
@@ -36,33 +28,20 @@ public class CreateRelease extends ReleasePipelineStepBuilder {
             return "sprintsCreateRelease";
         }
 
-        /**
-         *
-         * @return Display name in the UI
-         */
-        @Nonnull
         @Override
         public String getDisplayName() {
             return Messages.release_create();
         }
     }
 
-    public static class CreateReleaseExecutor extends SynchronousNonBlockingStepExecution<Void> {
-        private static final long serialVersionUID = 6L;
-        private final transient CreateRelease step;
+    public static class CreateReleaseExecutor extends PipelineStepExecutor {
 
-        protected CreateReleaseExecutor(CreateRelease step, @Nonnull StepContext context) {
-            super(context);
-            this.step = step;
+        protected CreateReleaseExecutor(BaseModel form, StepContext context) {
+            super(form, context);
         }
 
-        @Override
-        protected Void run() throws Exception {
-            new ReleaseAPI.ReleaseAPIBuilder(step.prefix, getContext().get(Run.class),
-                    getContext().get(TaskListener.class), step.release)
-                    .build()
-                    .create();
-            return null;
+        protected String execute() throws Exception {
+            return ReleaseAPI.getInstance().create((Release) form);
         }
 
     }

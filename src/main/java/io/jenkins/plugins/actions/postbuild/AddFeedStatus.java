@@ -1,36 +1,38 @@
 package io.jenkins.plugins.actions.postbuild;
 
-import java.io.IOException;
-import javax.annotation.Nonnull;
+import java.util.function.Function;
+
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
+
 import hudson.Extension;
-import hudson.Launcher;
-import hudson.model.AbstractBuild;
-import hudson.model.BuildListener;
 import hudson.util.FormValidation;
 import io.jenkins.plugins.Messages;
-import io.jenkins.plugins.actions.PostBuild;
-import io.jenkins.plugins.actions.PostBuildDescriptor;
-import io.jenkins.plugins.api.ProjectAPI;
+import io.jenkins.plugins.actions.postbuild.builder.PostBuild;
+import io.jenkins.plugins.actions.postbuild.descriptor.PostBuildDescriptor;
+import io.jenkins.plugins.api.FeedStatusAPI;
+import io.jenkins.plugins.model.FeedStatus;
 
 public class AddFeedStatus extends PostBuild {
-    private String feed;
 
     public String getFeed() {
-        return feed;
+        return getForm().getFeed();
+    }
+
+    public FeedStatus getForm() {
+        return (FeedStatus) super.getForm();
     }
 
     @DataBoundConstructor
     public AddFeedStatus(String prefix, String feed) {
-        super(prefix);
-        this.feed = feed;
+        super(FeedStatus.getInstance(prefix, feed));
     }
 
     @Override
-    public boolean _perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
-            throws InterruptedException, IOException {
-        return new ProjectAPI(prefix, feed, build, listener).addFeed();
+    public String perform(Function<String, String> getValueFromEnviroinmentValue) throws Exception {
+        FeedStatus feed = getForm();
+        feed.setEnviroinmentVaribaleReplacer(getValueFromEnviroinmentValue);
+        return new FeedStatusAPI().addFeed(feed);
     }
 
     @Extension
@@ -40,7 +42,6 @@ public class AddFeedStatus extends PostBuild {
             return FormValidation.validateRequired(feed);
         }
 
-        @Nonnull
         @Override
         public String getDisplayName() {
             return Messages.add_feed_status();

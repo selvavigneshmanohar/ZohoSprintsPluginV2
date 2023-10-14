@@ -1,11 +1,15 @@
 package io.jenkins.plugins.model;
 
-public class Item {
+public class Item extends BaseModel {
     private String name, description, status, type, priority, duration, startdate, enddate, customFields,
             assignee, note;
 
-    public static Item getInstance() {
-        return new Item();
+    private Item(String prefix) {
+        super(prefix);
+    }
+
+    public static Item getInstance(String prefix) {
+        return new Item(prefix);
     }
 
     public Item setName(String name) {
@@ -63,50 +67,47 @@ public class Item {
         return this;
     }
 
-    public Item() {
-    }
-
     public String getAssignee() {
-        return assignee;
+        return getValue(assignee);
     }
 
     public String getName() {
-        return name;
+        return getValue(name);
     }
 
     public String getDescription() {
-        return description;
+        return getValue(description);
     }
 
     public String getStatus() {
-        return status;
+        return getValue(status);
     }
 
     public String getType() {
-        return type;
+        return getValue(type);
     }
 
     public String getPriority() {
-        return priority;
+        return getValue(priority);
     }
 
     public String getDuration() {
-        return duration;
+        return getValue(duration);
     }
 
     public String getStartdate() {
-        return startdate;
+        return getValue(startdate);
     }
 
     public String getEnddate() {
-        return enddate;
+        return getValue(enddate);
     }
 
     public String getCustomFields() {
-        return customFields;
+        return getValue(customFields);
     }
 
     public String getNote() {
-        return note;
+        return getValue(note);
     }
 }

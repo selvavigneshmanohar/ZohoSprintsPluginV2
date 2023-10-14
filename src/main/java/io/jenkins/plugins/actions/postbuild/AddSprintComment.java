@@ -1,36 +1,31 @@
 package io.jenkins.plugins.actions.postbuild;
 
-import java.io.IOException;
-import javax.annotation.Nonnull;
+import java.util.function.Function;
+
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
+
 import hudson.Extension;
-import hudson.Launcher;
-import hudson.model.AbstractBuild;
-import hudson.model.BuildListener;
 import hudson.util.FormValidation;
 import io.jenkins.plugins.Messages;
-import io.jenkins.plugins.actions.PostBuild;
-import io.jenkins.plugins.actions.PostBuildDescriptor;
+import io.jenkins.plugins.actions.postbuild.builder.SprintsPostBuilder;
+import io.jenkins.plugins.actions.postbuild.descriptor.PostBuildDescriptor;
 import io.jenkins.plugins.api.SprintAPI;
+import io.jenkins.plugins.model.Sprint;
 
-public class AddSprintComment extends PostBuild {
-    private String note;
-
-    public String getNote() {
-        return note;
-    }
+public class AddSprintComment extends SprintsPostBuilder {
 
     @DataBoundConstructor
     public AddSprintComment(String prefix, String note) {
-        super(prefix);
-        this.note = note;
+        super(prefix, note);
     }
 
-    public boolean _perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
-            throws InterruptedException, IOException {
-        return new SprintAPI(prefix, listener, build).withComment(note).addComment();
+    @Override
+    public String perform(Function<String, String> getValueFromEnviroinmentValue) throws Exception {
+        Sprint sprint = getForm();
+        sprint.setEnviroinmentVaribaleReplacer(getValueFromEnviroinmentValue);
+        return SprintAPI.getInstance().addComment(sprint);
     }
 
     @Extension
@@ -43,7 +38,6 @@ public class AddSprintComment extends PostBuild {
             return FormValidation.ok();
         }
 
-        @Nonnull
         @Override
         public String getDisplayName() {
             return Messages.add_sprint_comment();

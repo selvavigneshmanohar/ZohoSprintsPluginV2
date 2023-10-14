@@ -1,22 +1,17 @@
 package io.jenkins.plugins.actions.postbuild;
 
-import java.io.IOException;
-
-import javax.annotation.Nonnull;
+import java.util.function.Function;
 
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
-import hudson.Extension;
-import hudson.Launcher;
-import hudson.model.AbstractBuild;
-import hudson.model.BuildListener;
 import hudson.util.FormValidation;
 import io.jenkins.plugins.Messages;
-import io.jenkins.plugins.actions.PostBuildDescriptor;
-import io.jenkins.plugins.actions.ReleasePostBuilder;
+import io.jenkins.plugins.actions.postbuild.builder.ReleasePostBuilder;
+import io.jenkins.plugins.actions.postbuild.descriptor.PostBuildDescriptor;
 import io.jenkins.plugins.api.ReleaseAPI;
+import io.jenkins.plugins.model.Release;
 
 public class AddReleaseComment extends ReleasePostBuilder {
 
@@ -26,11 +21,10 @@ public class AddReleaseComment extends ReleasePostBuilder {
     }
 
     @Override
-    public boolean _perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
-            throws InterruptedException, IOException {
-        return new ReleaseAPI.ReleaseAPIBuilder(prefix, build, listener, release)
-                .build()
-                .addComment();
+    public String perform(Function<String, String> getValueFromEnviroinmentValue) throws Exception {
+        Release release = getForm();
+        release.setEnviroinmentVaribaleReplacer(getValueFromEnviroinmentValue);
+        return ReleaseAPI.getInstance().addComment(release);
     }
 
     // @Extension
@@ -43,7 +37,6 @@ public class AddReleaseComment extends ReleasePostBuilder {
             return FormValidation.ok();
         }
 
-        @Nonnull
         @Override
         public String getDisplayName() {
             return Messages.add_release_comment();

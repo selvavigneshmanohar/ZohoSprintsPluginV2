@@ -1,10 +1,38 @@
 package io.jenkins.plugins.model;
 
-public class Release {
+public class Release extends BaseModel {
     private String name, goal, stage, startdate, enddate, customFields, owners, note;
 
     public String getNote() {
         return note;
+    }
+
+    public String getName() {
+        return getValue(name);
+    }
+
+    public String getGoal() {
+        return getValue(goal);
+    }
+
+    public String getStage() {
+        return getValue(stage);
+    }
+
+    public String getStartdate() {
+        return getValue(startdate);
+    }
+
+    public String getEnddate() {
+        return getValue(enddate);
+    }
+
+    public String getCustomFields() {
+        return getValue(customFields);
+    }
+
+    public String getOwners() {
+        return getValue(owners);
     }
 
     public Release setNote(String note) {
@@ -12,17 +40,9 @@ public class Release {
         return this;
     }
 
-    public String getName() {
-        return name;
-    }
-
     public Release setName(String name) {
         this.name = name;
         return this;
-    }
-
-    public String getGoal() {
-        return goal;
     }
 
     public Release setGoal(String goal) {
@@ -30,17 +50,9 @@ public class Release {
         return this;
     }
 
-    public String getStage() {
-        return stage;
-    }
-
     public Release setStage(String stage) {
         this.stage = stage;
         return this;
-    }
-
-    public String getStartdate() {
-        return startdate;
     }
 
     public Release setStartdate(String startdate) {
@@ -48,17 +60,9 @@ public class Release {
         return this;
     }
 
-    public String getEnddate() {
-        return enddate;
-    }
-
     public Release setEnddate(String enddate) {
         this.enddate = enddate;
         return this;
-    }
-
-    public String getCustomFields() {
-        return customFields;
     }
 
     public Release setCustomFields(String customFields) {
@@ -66,17 +70,17 @@ public class Release {
         return this;
     }
 
-    public String getOwners() {
-        return owners;
-    }
-
     public Release setOwners(String owners) {
         this.owners = owners;
         return this;
     }
 
-    public static Release getInstance() {
-        return new Release();
+    private Release(String prefix) {
+        super(prefix);
+    }
+
+    public static Release getInstance(String prefix) {
+        return new Release(prefix);
     }
 
 }

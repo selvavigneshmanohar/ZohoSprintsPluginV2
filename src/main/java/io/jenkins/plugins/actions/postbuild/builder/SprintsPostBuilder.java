@@ -1,41 +1,46 @@
-package io.jenkins.plugins.actions;
+package io.jenkins.plugins.actions.postbuild.builder;
 
 import io.jenkins.plugins.model.Sprint;
 
 public abstract class SprintsPostBuilder extends PostBuild {
-    protected Sprint sprint;
 
     public SprintsPostBuilder(String prefix, String name, String description, String duration, String startdate,
             String enddate) {
-        super(prefix);
-        sprint = Sprint.getInstance().setName(name)
+        super(Sprint.getInstance(prefix).setName(name)
                 .setDuration(duration)
                 .setStartdate(startdate)
-                .setEnddate(enddate);
+                .setEnddate(enddate));
     }
 
     public SprintsPostBuilder(String prefix, String note) {
-        super(prefix);
-        sprint = Sprint.getInstance().setNote(note);
+        super(Sprint.getInstance(prefix).setNote(note));
+    }
+
+    public Sprint getForm() {
+        return (Sprint) super.getForm();
     }
 
     public String getName() {
-        return sprint.getName();
+        return getForm().getName();
     }
 
     public String getStartdate() {
-        return sprint.getStartdate();
+        return getForm().getStartdate();
     }
 
     public String getEnddate() {
-        return sprint.getEnddate();
+        return getForm().getEnddate();
     }
 
     public String getNote() {
-        return sprint.getNote();
+        return getForm().getNote();
     }
 
     public String getDuration() {
-        return sprint.getDuration();
+        return getForm().getDuration();
+    }
+
+    public String getDescription() {
+        return getForm().getDescription();
     }
 }

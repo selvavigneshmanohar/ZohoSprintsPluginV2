@@ -1,15 +1,10 @@
 package io.jenkins.plugins.model;
 
-public class Sprint {
-    private String name, description, startdate, enddate, duration, users, note, durationType;
+public class Sprint extends BaseModel {
+    private String name, description, startdate, enddate, duration, users, note;
 
     public String getDurationType() {
-        return durationType;
-    }
-
-    public Sprint setDurationType(String durationType) {
-        this.durationType = durationType;
-        return this;
+        return getValue(description);
     }
 
     public Sprint setName(String name) {
@@ -18,11 +13,11 @@ public class Sprint {
     }
 
     public String getName() {
-        return name;
+        return getValue(name);
     }
 
     public String getDescription() {
-        return description;
+        return getValue(description);
     }
 
     public Sprint setDescription(String description) {
@@ -31,7 +26,7 @@ public class Sprint {
     }
 
     public String getStartdate() {
-        return startdate;
+        return getValue(startdate);
     }
 
     public Sprint setStartdate(String startdate) {
@@ -40,7 +35,7 @@ public class Sprint {
     }
 
     public String getEnddate() {
-        return enddate;
+        return getValue(enddate);
     }
 
     public Sprint setEnddate(String enddate) {
@@ -49,7 +44,7 @@ public class Sprint {
     }
 
     public String getDuration() {
-        return duration;
+        return getValue(duration);
     }
 
     public Sprint setDuration(String duration) {
@@ -58,7 +53,7 @@ public class Sprint {
     }
 
     public String getUsers() {
-        return users;
+        return getValue(users);
     }
 
     public Sprint setUsers(String users) {
@@ -67,7 +62,7 @@ public class Sprint {
     }
 
     public String getNote() {
-        return note;
+        return getValue(note);
     }
 
     public Sprint setNote(String note) {
@@ -75,8 +70,12 @@ public class Sprint {
         return this;
     }
 
-    public static Sprint getInstance() {
-        return new Sprint();
+    private Sprint(String prefix) {
+        super(prefix);
+    }
+
+    public static Sprint getInstance(String prefix) {
+        return new Sprint(prefix);
     }
 
 }

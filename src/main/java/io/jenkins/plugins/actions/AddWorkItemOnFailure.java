@@ -1,34 +1,32 @@
 package io.jenkins.plugins.actions;
 
+import static io.jenkins.plugins.util.Util.isEmpty;
+import static io.jenkins.plugins.util.Util.replaceEnvVaribaleToValue;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.StaplerRequest;
+
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.matrix.MatrixProject;
-import hudson.model.BuildListener;
-import hudson.model.Run;
-import hudson.model.Result;
 import hudson.model.AbstractProject;
+import hudson.model.BuildListener;
+import hudson.model.Result;
+import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.tasks.BuildWrapperDescriptor;
 import hudson.util.FormValidation;
 import io.jenkins.plugins.Messages;
 import jenkins.tasks.SimpleBuildWrapper;
 import net.sf.json.JSONObject;
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.QueryParameter;
-import org.kohsuke.stapler.StaplerRequest;
-import javax.annotation.Nonnull;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import static org.apache.commons.lang.StringUtils.isEmpty;
-import static io.jenkins.plugins.util.Util.replaceEnvVaribaleToValue;
 
-/**
- * @author selvavignesh.m
- * @version 1.0
- */
 public class AddWorkItemOnFailure extends SimpleBuildWrapper {
     private String prefix, name, description, status, type, priority, duration, startdate, enddate, customFields;
 
@@ -88,18 +86,6 @@ public class AddWorkItemOnFailure extends SimpleBuildWrapper {
         return customFields;
     }
 
-    /**
-     *
-     * @param context            BuildWrapper context
-     * @param build              Current Build Object
-     * @param workspace          File path of the Workspace
-     * @param launcher           Responsible for inherit the Global Variable
-     * @param listener           Listener Objetc of Task
-     * @param initialEnvironment Environmental Variables
-     * @throws InterruptedException when a thread that is sleeping, waiting, or is
-     *                              occupied is interrupted
-     * @throws IOException          Input/Output error
-     */
     @Override
     public void setUp(Context context, Run<?, ?> build, FilePath workspace, Launcher launcher,
             TaskListener listener, EnvVars initialEnvironment) throws IOException, InterruptedException {
@@ -131,67 +117,32 @@ public class AddWorkItemOnFailure extends SimpleBuildWrapper {
         context.getEnv().putAll(envMap);
     }
 
-    /**
-     *
-     * @return Descriptor of this Class
-     */
     @Override
     public DescriptorImpl getDescriptor() {
         return (DescriptorImpl) super.getDescriptor();
     }
 
-    /**
-     * @author selvavignesh.m
-     * @version 1.0
-     */
     @Extension
     public static class DescriptorImpl extends BuildWrapperDescriptor {
-        /**
-         *
-         * @param item project object
-         * @return if Sprints plugin Authendicated the true, or false
-         */
         @Override
         public boolean isApplicable(AbstractProject<?, ?> item) {
             return !(item instanceof MatrixProject);
 
         }
 
-        /**
-         *
-         * @return Display Name of the Build ennvironmanatal pace
-         */
-        @Nonnull
         @Override
         public String getDisplayName() {
             return Messages.issue_in_failure();
         }
 
-        /**
-         *
-         * @param prefix To where the item to be created {prefix} Backlog/sprint
-         * @return if prefix matches the regex then true else error message
-         */
         public FormValidation doCheckPrefix(@QueryParameter final String prefix) {
             return FormValidation.validateRequired(prefix);
         }
 
-        /**
-         *
-         * @param name Name of the Sprints Item
-         * @return if param is not null or empty then OK else Error
-         */
         public FormValidation doCheckName(@QueryParameter final String name) {
             return FormValidation.validateRequired(name);
         }
 
-        /**
-         *
-         * @param req  request obj
-         * @param json Object which contains values and key
-         * @return true/false
-         * @throws FormException if querying of form throws an error
-         */
         @Override
         public boolean configure(StaplerRequest req, JSONObject json) throws FormException {
             req.bindJSON(this, json);

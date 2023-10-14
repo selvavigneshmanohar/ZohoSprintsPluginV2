@@ -1,37 +1,36 @@
 package io.jenkins.plugins.actions.buildstepaction;
 
-import java.io.IOException;
-
-import javax.annotation.Nonnull;
+import java.util.function.Function;
 
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import hudson.Extension;
-import hudson.Launcher;
-import hudson.model.AbstractBuild;
-import hudson.model.BuildListener;
-import hudson.tasks.Builder;
 import io.jenkins.plugins.Messages;
-import io.jenkins.plugins.actions.BuildStep;
-import io.jenkins.plugins.actions.BuildStepDescriptorImpl;
+import io.jenkins.plugins.actions.buildstepaction.builder.BuildStep;
+import io.jenkins.plugins.actions.buildstepaction.descriptor.BuildStepDescriptorImpl;
 import io.jenkins.plugins.api.SprintAPI;
+import io.jenkins.plugins.model.Sprint;
 
 public class StartSprint extends BuildStep {
     @DataBoundConstructor
     public StartSprint(String prefix) {
-        super(prefix);
+        super(Sprint.getInstance(prefix));
+    }
+
+    public Sprint getForm() {
+        return (Sprint) super.getForm();
     }
 
     @Override
-    public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
-            throws InterruptedException, IOException {
-        return new SprintAPI(prefix, listener, build).start();
+    public String perform(Function<String, String> getValueFromEnviroinmentValue) throws Exception {
+        Sprint sprint = getForm();
+        sprint.setEnviroinmentVaribaleReplacer(getValueFromEnviroinmentValue);
+        return SprintAPI.getInstance().start(sprint);
     }
 
     @Extension
     public static class DescriptorImpl extends BuildStepDescriptorImpl {
 
-        @Nonnull
         @Override
         public String getDisplayName() {
             return Messages.update_sprint_start();

@@ -1,18 +1,15 @@
 package io.jenkins.plugins.actions.postbuild;
 
-import java.io.IOException;
-import javax.annotation.Nonnull;
+import java.util.function.Function;
+
 import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.QueryParameter;
+
 import hudson.Extension;
-import hudson.Launcher;
-import hudson.model.AbstractBuild;
-import hudson.model.BuildListener;
-import hudson.util.FormValidation;
 import io.jenkins.plugins.Messages;
-import io.jenkins.plugins.actions.PostBuildDescriptor;
-import io.jenkins.plugins.actions.ReleasePostBuilder;
+import io.jenkins.plugins.actions.postbuild.builder.ReleasePostBuilder;
+import io.jenkins.plugins.actions.postbuild.descriptor.PostBuildDescriptor;
 import io.jenkins.plugins.api.ReleaseAPI;
+import io.jenkins.plugins.model.Release;
 
 public class UpdateRelease extends ReleasePostBuilder {
     @DataBoundConstructor
@@ -22,18 +19,15 @@ public class UpdateRelease extends ReleasePostBuilder {
     }
 
     @Override
-    public boolean _perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
-            throws InterruptedException, IOException {
-        return new ReleaseAPI.ReleaseAPIBuilder(prefix, build, listener, release)
-                .build()
-                .update();
-
+    public String perform(Function<String, String> getValueFromEnviroinmentValue) throws Exception {
+        Release release = getForm();
+        release.setEnviroinmentVaribaleReplacer(getValueFromEnviroinmentValue);
+        return ReleaseAPI.getInstance().update(release);
     }
 
     @Extension
     public static class DescriptorImpl extends PostBuildDescriptor {
 
-        @Nonnull
         @Override
         public String getDisplayName() {
             return Messages.release_update();

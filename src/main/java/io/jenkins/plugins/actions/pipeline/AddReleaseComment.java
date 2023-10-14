@@ -1,71 +1,46 @@
 package io.jenkins.plugins.actions.pipeline;
 
-import javax.annotation.Nonnull;
-
 import org.jenkinsci.plugins.workflow.steps.StepContext;
-import org.jenkinsci.plugins.workflow.steps.StepExecution;
-import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
-import hudson.Extension;
-import hudson.model.Run;
-import hudson.model.TaskListener;
-import io.jenkins.plugins.Messages;
-import io.jenkins.plugins.actions.PipelineStepDescriptor;
-import io.jenkins.plugins.actions.ReleasePipelineStepBuilder;
-import io.jenkins.plugins.api.ReleaseAPI;
 
-public class AddReleaseComment extends ReleasePipelineStepBuilder {
+import io.jenkins.plugins.Messages;
+import io.jenkins.plugins.actions.pipeline.descriptor.PipelineStepDescriptor;
+import io.jenkins.plugins.actions.pipeline.executor.PipelineStepExecutor;
+import io.jenkins.plugins.actions.pipeline.step.ReleasePipelineStep;
+import io.jenkins.plugins.api.ReleaseAPI;
+import io.jenkins.plugins.model.BaseModel;
+import io.jenkins.plugins.model.Release;
+
+public class AddReleaseComment extends ReleasePipelineStep {
 
     @DataBoundConstructor
     public AddReleaseComment(String prefix, String note) {
         super(prefix, note);
     }
 
-    @Override
-    public StepExecution start(StepContext context) throws Exception {
-        return new AddReleaseCommentExecutor(this, context);
-    }
-
     // @Extension(optional = true)
     public static final class DescriptorImpl extends PipelineStepDescriptor {
-
-        /**
-         *
-         * @return function name of the add Sprint item Action
-         */
         @Override
         public String getFunctionName() {
             return "AddReleaseComment";
         }
 
-        /**
-         *
-         * @return Display name in the UI
-         */
-        @Nonnull
         @Override
         public String getDisplayName() {
             return Messages.add_release_comment();
         }
     }
 
-    public static class AddReleaseCommentExecutor extends SynchronousNonBlockingStepExecution<Void> {
-        private static final long serialVersionUID = 3L;
-        private final transient AddReleaseComment step;
+    public static class AddReleaseCommentExecutor extends PipelineStepExecutor {
 
-        protected AddReleaseCommentExecutor(AddReleaseComment step, @Nonnull StepContext context) {
-            super(context);
-            this.step = step;
+        protected AddReleaseCommentExecutor(BaseModel form, StepContext context) {
+            super(form, context);
         }
 
-        @Override
-        protected Void run() throws Exception {
-            new ReleaseAPI.ReleaseAPIBuilder(step.getPrefix(), getContext().get(Run.class),
-                    getContext().get(TaskListener.class), step.release)
-                    .build()
-                    .addComment();
-            return null;
+        protected String execute() throws Exception {
+            return ReleaseAPI.getInstance().addComment((Release) form);
         }
+
     }
 
 }

@@ -1,56 +1,56 @@
-package io.jenkins.plugins.actions;
+package io.jenkins.plugins.actions.buildstepaction.builder;
 
 import io.jenkins.plugins.model.Release;
 
 public abstract class ReleaseStepBuilder extends BuildStep {
-    protected Release release;
-
     public ReleaseStepBuilder(String prefix, String name, String owners, String goal, String stage, String startdate,
             String enddate, String customFields) {
-        super(prefix);
-        release = Release.getInstance().setName(name)
+        super(Release.getInstance(prefix).setName(name)
                 .setOwners(owners)
                 .setGoal(goal)
                 .setStage(stage)
                 .setStartdate(startdate)
                 .setEnddate(enddate)
-                .setCustomFields(customFields);
+                .setCustomFields(customFields));
     }
 
     public ReleaseStepBuilder(String prefix, String note) {
-        super(prefix);
-        release = Release.getInstance().setNote(note);
+        super(Release.getInstance(prefix).setNote(note));
+    }
+
+    public Release getForm() {
+        return (Release) super.getForm();
     }
 
     public String getName() {
-        return release.getName();
+        return getForm().getName();
     }
 
     public String getGoal() {
-        return release.getGoal();
+        return getForm().getGoal();
     }
 
     public String getStage() {
-        return release.getStage();
+        return getForm().getStage();
     }
 
     public String getStartdate() {
-        return release.getStartdate();
+        return getForm().getStartdate();
     }
 
     public String getEnddate() {
-        return release.getEnddate();
+        return getForm().getEnddate();
     }
 
     public String getCustomFields() {
-        return release.getCustomFields();
+        return getForm().getCustomFields();
     }
 
     public String getOwners() {
-        return release.getOwners();
+        return getForm().getOwners();
     }
 
     public String getNote() {
-        return release.getNote();
+        return getForm().getNote();
     }
 }

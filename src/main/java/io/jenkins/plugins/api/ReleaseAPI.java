@@ -1,22 +1,11 @@
 package io.jenkins.plugins.api;
 
-import static io.jenkins.plugins.util.Util.getZSUserIds;
-import static io.jenkins.plugins.util.Util.replaceEnvVaribaleToValue;
-import static io.jenkins.plugins.util.Util.sprintsLogparser;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import hudson.model.Run;
-import hudson.model.TaskListener;
-import io.jenkins.plugins.sprints.ZohoClient;
+import io.jenkins.plugins.exception.ZSprintsException;
 import io.jenkins.plugins.model.Release;
 import io.jenkins.plugins.sprints.RequestClient;
+import io.jenkins.plugins.sprints.ZohoClient;
 import io.jenkins.plugins.util.Util;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -26,207 +15,63 @@ public final class ReleaseAPI {
     private static final String CREATE_RELEASE_API = "/projects/no-$1/release/";
     private static final String UPDATE_RELEASE_API = "/projects/no-$1/release/no-$2/update/";
     private static final String ADD_COMMENT_API = "/projects/no-$1/release/no-$2/notes/";
-    private String name, owners, goal, stage, startdate, enddate, customFields, comment;
-    private JSONArray ownerIds = null;
-    private Integer projectNumber, releaseNumber;
-    private Run<?, ?> build;
-    private TaskListener listener;
 
-    private ReleaseAPI(ReleaseAPIBuilder builder) {
-        this.name = builder.release.getName();
-        this.owners = builder.release.getOwners();
-        this.goal = builder.release.getGoal();
-        this.stage = builder.release.getStage();
-        this.startdate = builder.release.getStartdate();
-        this.enddate = builder.release.getEnddate();
-        this.customFields = builder.release.getCustomFields();
-        this.comment = builder.release.getNote();
-        this.projectNumber = builder.projectNumber;
-        this.releaseNumber = builder.releaseNumber;
-        this.build = builder.build;
-        this.listener = builder.listener;
+    private ReleaseAPI() {
 
     }
 
-    private String envReplacer(String key) throws IOException, InterruptedException {
-        return replaceEnvVaribaleToValue(build, listener, key);
+    public static ReleaseAPI getInstance() {
+        return new ReleaseAPI();
     }
 
-    public boolean create() throws IOException, InterruptedException {
-        if (projectNumber == null) {
-            listener.error("Invalid Prefix");
-            return Boolean.FALSE;
+    public String create(Release release) throws Exception {
+        JSONArray ownerIds = null;
+        String assignee = release.getOwners();
+        if (assignee != null && !assignee.trim().isEmpty()) {
+            ownerIds = Util.getZSUserIds(release.getProjectNumber(), assignee);
         }
-        if (owners != null) {
-            try {
-                this.ownerIds = getZSUserIds(projectNumber, envReplacer(owners), build, listener);
-            } catch (Exception e) {
-                listener.error("Error occure while fetching assignees");
-                return Boolean.FALSE;
-            }
+        ZohoClient client = new ZohoClient(CREATE_RELEASE_API, RequestClient.METHOD_POST, release.getProjectNumber())
+                .setJsonBodyresponse(true)
+                .addParameter("ownerIds", (ownerIds != null && !ownerIds.isEmpty()) ? ownerIds : null);
+        Util.setCustomFields(release.getCustomFields(), client);
+        String response = addOrUpdateRelease(release, client);
+        String message = JSONObject.fromObject(response).optString("i18nMessage", null);
+        if (message == null) {
+            return "Release has been added";
         }
-        JSONObject param = new JSONObject();
-        param.put("name", envReplacer(name));
-        param.put("startdate", envReplacer(startdate));
-        param.put("enddate", envReplacer(enddate));
-        param.put("statusName", envReplacer(stage));
-        param.put("goal", envReplacer(goal));
-        param.put("ownerIds", (ownerIds == null || ownerIds.isEmpty()) ? null : ownerIds);
-        return execute(CREATE_RELEASE_API, param);
+        throw new ZSprintsException(message);
     }
 
-    private boolean emptyCheck(String value) {
-        return value != null && value.length() > 0;
+    public String update(Release release) throws Exception {
+        ZohoClient client = new ZohoClient(UPDATE_RELEASE_API, RequestClient.METHOD_POST, release.getProjectNumber(),
+                release.getReleaseNumber())
+                .setJsonBodyresponse(true);
+
+        String response = addOrUpdateRelease(release, client);
+        String message = JSONObject.fromObject(response).optString("i18nMessage", null);
+        if (message == null) {
+            return "Release has been updated";
+        }
+        throw new ZSprintsException(message);
     }
 
-    public boolean update() throws IOException, InterruptedException {
-        if (projectNumber == null || releaseNumber == null) {
-            listener.error("Invalid Prefix");
-            return Boolean.FALSE;
-        }
-        JSONObject param = new JSONObject();
-        if (emptyCheck(name)) {
-            param.put("name", envReplacer(name));
-        }
-        if (emptyCheck(startdate)) {
-            param.put("startdate", envReplacer(startdate));
-        }
-        if (emptyCheck(enddate)) {
-            param.put("enddate", envReplacer(enddate));
-        }
-        if (emptyCheck(stage)) {
-            param.put("statusName", envReplacer(stage));
-        }
-        if (emptyCheck(goal)) {
-            param.put("goal", envReplacer(goal));
-        }
-        if (ownerIds != null && !ownerIds.isEmpty()) {
-            param.put("ownerIds", ownerIds);
-        }
-
-        return execute(UPDATE_RELEASE_API, param);
+    private String addOrUpdateRelease(Release release, ZohoClient client) throws Exception {
+        client.setJsonBodyresponse(true)
+                .addParameter("name", release.getName())
+                .addParameter("startdate", release.getStartdate())
+                .addParameter("enddate", release.getEnddate())
+                .addParameter("statusName", release.getStage())
+                .addParameter("goal", release.getGoal());
+        Util.setCustomFields(release.getCustomFields(), client);
+        return client.execute();
     }
 
-    public boolean addComment() {
-        if (projectNumber == null || releaseNumber == null) {
-            listener.error("Invalid Prefix");
-            return Boolean.FALSE;
-        }
-        Map<String, Object> param = new HashMap<>();
-        param.put("name", comment);
-        try {
-            ZohoClient client = new ZohoClient(ADD_COMMENT_API, RequestClient.METHOD_POST, param, listener, build,
-                    projectNumber.toString(), releaseNumber.toString());
-            client.execute();
-            if (client.isSuccessRequest()) {
-                listener.getLogger().println(sprintsLogparser("Release Comment added successfully", false));
-                return Boolean.TRUE;
-            }
-        } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Error at add Release Comment", e);
-        }
-        return Boolean.FALSE;
+    public String addComment(Release release) throws Exception {
 
-    }
-
-    private boolean execute(String api, JSONObject param) throws IOException, InterruptedException {
-        Util.setCustomFields(customFields, param, null);
-        try {
-            ZohoClient client = new ZohoClient(api, RequestClient.METHOD_POST, param, listener, build,
-                    projectNumber.toString(), releaseNumber == null ? null : releaseNumber.toString());
-            String response = client.execute();
-            boolean isSuccessRequest = client.isSuccessRequest();
-            String message = null;
-            if (releaseNumber == null && isSuccessRequest) {
-                message = JSONObject.fromObject(response).optString("message", null);
-                if (message == null) {
-                    listener.getLogger().println(sprintsLogparser("Release has been added", false));
-                }
-                return isSuccessRequest;
-            } else if (releaseNumber != null && isSuccessRequest) {
-                message = JSONObject.fromObject(response).optString("i18nMessage", null);
-                if (message == null) {
-                    listener.getLogger().println(sprintsLogparser("Release has been updated", false));
-                }
-                return isSuccessRequest;
-            }
-            listener.error(sprintsLogparser(message, true));
-            return isSuccessRequest;
-        } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Error", e);
-        }
-        return Boolean.FALSE;
-    }
-
-    public static class ReleaseAPIBuilder {
-        private String prefix;
-        private Integer projectNumber, releaseNumber;
-        private Run<?, ?> build;
-        private TaskListener listener;
-        private Release release;
-        public static final Pattern ZS_RELEASE = Pattern.compile("^(P|p)([0-9]+)(#(r|R)([0-9]+))?$");
-
-        private String getEnvVaribaleToValue(String key) throws IOException, InterruptedException {
-            return replaceEnvVaribaleToValue(build, listener, key);
-        }
-
-        public ReleaseAPIBuilder(String prefix, Run<?, ?> build, TaskListener listener, Release release)
-                throws IOException, InterruptedException {
-            withListener(listener).withBuild(build)
-                    .withPrefix(replaceEnvVaribaleToValue(build, listener, prefix))
-                    .setModel(release);
-
-        }
-
-        private ReleaseAPIBuilder setModel(Release release) {
-            this.release = release;
-            return this;
-        }
-
-        public String getPrefix() {
-            return prefix;
-        }
-
-        public ReleaseAPIBuilder withPrefix(String value) throws IOException, InterruptedException {
-            this.prefix = getEnvVaribaleToValue(value);
-            return this;
-        }
-
-        public Integer getProjectNo() {
-            return projectNumber;
-        }
-
-        public Integer getReleaseNo() {
-            return releaseNumber;
-        }
-
-        public Run<?, ?> getBuild() {
-            return build;
-        }
-
-        private ReleaseAPIBuilder withBuild(Run<?, ?> build) {
-            this.build = build;
-            return this;
-        }
-
-        public TaskListener getListener() {
-            return listener;
-        }
-
-        private ReleaseAPIBuilder withListener(TaskListener listener) {
-            this.listener = listener;
-            return this;
-        }
-
-        public ReleaseAPI build() {
-            Matcher matcher = ZS_RELEASE.matcher(prefix);
-            if (matcher.matches()) {
-                this.projectNumber = Integer.parseInt(matcher.group(2));
-                this.releaseNumber = matcher.group(5) == null ? null : Integer.parseInt(matcher.group(5));
-            }
-            LOGGER.info(matcher.group(5));
-            LOGGER.info(matcher.group(4));
-            return new ReleaseAPI(this);
-        }
+        new ZohoClient(ADD_COMMENT_API, RequestClient.METHOD_POST, release.getProjectNumber(),
+                release.getReleaseNumber())
+                .addParameter("name", release.getNote())
+                .execute();
+        return "Release Comment added successfully";
     }
 }

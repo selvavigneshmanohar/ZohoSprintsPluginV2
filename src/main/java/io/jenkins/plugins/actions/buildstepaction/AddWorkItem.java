@@ -1,19 +1,19 @@
 package io.jenkins.plugins.actions.buildstepaction;
 
-import static org.apache.commons.lang.StringUtils.isEmpty;
-import java.io.IOException;
-import javax.annotation.Nonnull;
+import static io.jenkins.plugins.util.Util.isEmpty;
+
+import java.util.function.Function;
+
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
+
 import hudson.Extension;
-import hudson.Launcher;
-import hudson.model.AbstractBuild;
-import hudson.model.BuildListener;
 import hudson.util.FormValidation;
 import io.jenkins.plugins.Messages;
-import io.jenkins.plugins.actions.BuildStepDescriptorImpl;
-import io.jenkins.plugins.actions.ItemStepBuilder;
-import io.jenkins.plugins.api.ItemAPI;
+import io.jenkins.plugins.actions.buildstepaction.builder.ItemStepBuilder;
+import io.jenkins.plugins.actions.buildstepaction.descriptor.BuildStepDescriptorImpl;
+import io.jenkins.plugins.api.WorkItemAPI;
+import io.jenkins.plugins.model.Item;
 
 public class AddWorkItem extends ItemStepBuilder {
 
@@ -24,17 +24,14 @@ public class AddWorkItem extends ItemStepBuilder {
     }
 
     @Override
-    public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
-            throws InterruptedException, IOException {
-        return new ItemAPI.ItemActionBuilder(prefix, build, listener, item)
-                .build()
-                .create();
+    public String perform(Function<String, String> getValueFromEnviroinmentValue) throws Exception {
+        Item itemForm = getForm();
+        itemForm.setEnviroinmentVaribaleReplacer(getValueFromEnviroinmentValue);
+        return WorkItemAPI.getInstance().addItem(itemForm);
     }
 
     @Extension
     public static class DescriptorImpl extends BuildStepDescriptorImpl {
-
-        @Nonnull
         @Override
         public String getDisplayName() {
             return Messages.create_item();

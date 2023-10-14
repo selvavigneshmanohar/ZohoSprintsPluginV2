@@ -1,20 +1,19 @@
-package io.jenkins.plugins.actions;
+package io.jenkins.plugins.actions.postbuild.descriptor;
 
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
-import hudson.matrix.MatrixProject;
+
 import hudson.model.AbstractProject;
 import hudson.tasks.BuildStepDescriptor;
-import hudson.tasks.Builder;
+import hudson.tasks.Publisher;
 import hudson.util.FormValidation;
-import hudson.util.ListBoxModel;
 import net.sf.json.JSONObject;
 
-public class BuildStepDescriptorImpl extends BuildStepDescriptor<Builder> {
+public class PostBuildDescriptor extends BuildStepDescriptor<Publisher> {
 
     @Override
     public boolean isApplicable(Class<? extends AbstractProject> jobType) {
-        return !MatrixProject.class.equals(jobType);
+        return true;
     }
 
     @Override
@@ -27,17 +26,4 @@ public class BuildStepDescriptorImpl extends BuildStepDescriptor<Builder> {
     public FormValidation doCheckPrefix(@QueryParameter final String prefix) {
         return FormValidation.validateRequired(prefix);
     }
-
-    public ListBoxModel doFillDurationTypeItems() {
-        ListBoxModel items = new ListBoxModel();
-
-        items.add("Duration", "duration");
-        items.add("Date", "date");
-        return items;
-    }
-
-    public boolean isDurationSelected(String option) {
-        return "duration".equals(option);
-    }
-
 }

@@ -7,34 +7,47 @@ import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletResponse;
 
-import hudson.model.Run;
-import hudson.model.TaskListener;
 import io.jenkins.plugins.configuration.ZSConnectionConfiguration;
+import io.jenkins.plugins.exception.ZSprintsException;
 import io.jenkins.plugins.util.Util;
+import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 public class ZohoClient {
     private static final Logger logger = Logger.getLogger(ZohoClient.class.getName());
-    private RequestClient client;
-    private TaskListener listener;
     private int responsecode;
+    private Map<String, Object> queryParam = new HashMap<>();
+    private String api;
+    private String method;
+    private String[] relativeUrlParams;
+    private boolean isJsonBodyresponse = false;
 
-    public ZohoClient(String api, String method, Map<String, Object> queryParam, TaskListener listener,
-            Run<?, ?> build, String... relativeUrlParams) throws Exception {
-        this.listener = listener;
-        this.client = new RequestClient(api, method, queryParam, relativeUrlParams)
-                .setListener(listener).setBuild(build);
+    public ZohoClient(String api, String method,
+            String... relativeUrlParams) throws Exception {
+        this.api = api;
+        this.method = method;
+        this.relativeUrlParams = relativeUrlParams;
     }
 
-    public ZohoClient(String api, String method, JSONObject body, TaskListener listener,
-            Run<?, ?> build, String... relativeUrlParams) throws Exception {
-        this.listener = listener;
-        this.client = new RequestClient(api, method, body, relativeUrlParams)
-                .setListener(listener).setBuild(build);
+    public ZohoClient addParameter(String key, String value) {
+        logger.info("Key -->" + key + "  value -->" + value);
+        if (value != null && !value.trim().isEmpty()) {
+            queryParam.put(key, value);
+        }
+        return this;
     }
 
-    public int getResponsecode() {
-        return responsecode;
+    public ZohoClient setJsonBodyresponse(boolean isJsonBodyresponse) {
+        this.isJsonBodyresponse = isJsonBodyresponse;
+        return this;
+    }
+
+    public ZohoClient addParameter(String key, JSONArray value) {
+        logger.log(Level.INFO, "Key - {0} Value - {0}", new Object[] { key, value });
+        if (value != null && !value.isEmpty()) {
+            queryParam.put(key, value);
+        }
+        return this;
     }
 
     public boolean isSuccessRequest() {
@@ -43,8 +56,12 @@ public class ZohoClient {
 
     public String execute() throws Exception {
         isOAuthTokenAvailable();
+        @SuppressWarnings("DLS_DEAD_LOCAL_STORE")
+        RequestClient client = new RequestClient(api, method, relativeUrlParams)
+                .setJSONBodyContent(isJsonBodyresponse)
+                .setQueryParam(queryParam);
         String response = client.execute();
-        if (isOAuthExpired(response)) {
+        if (isOAuthExpired(client, response)) {
             generateNewAccessToken();
             response = client.execute();
         }
@@ -52,14 +69,14 @@ public class ZohoClient {
         if (isSuccessRequest()) {
             return response;
         }
-        listener.error(JSONObject.fromObject(response).toString());
-        return response;
+        throw new ZSprintsException(JSONObject.fromObject(response).toString());
 
     }
 
-    private boolean isOAuthExpired(String response) {
-        JSONObject respObject = JSONObject.fromObject(response);
-        return respObject.optInt("code", 0) == 7601 || client.getResponsecode() == HttpServletResponse.SC_UNAUTHORIZED;
+    private boolean isOAuthExpired(RequestClient client, String response) {
+        logger.info("" + JSONObject.fromObject(response).optInt("code", 0));
+        return client.getResponsecode() == HttpServletResponse.SC_BAD_REQUEST &&
+                JSONObject.fromObject(response).optInt("code", 0) == 7601;
     }
 
     private void isOAuthTokenAvailable() throws Exception {
@@ -72,18 +89,16 @@ public class ZohoClient {
     public static synchronized void generateNewAccessToken() throws Exception {
         ZSConnectionConfiguration config = Util.getZSConnection();
         logger.info("New Token method called");
-        Map<String, Object> param = new HashMap<>();
         String accessToken = null;
-        param.put("grant_type", "refresh_token");
-        param.put("client_id", config.getClientId());
-        param.put("client_secret", config.getClientSecret());
-        param.put("refresh_token", config.getRefreshToken());
-        param.put("redirect_uri", config.getRedirectURL());
         RequestClient requestClient = new RequestClient(config.getAccountsDomain() + "/oauth/v2/token",
-                RequestClient.METHOD_POST,
-                param, null);
+                RequestClient.METHOD_POST, null)
+                .addParameter("grant_type", "refresh_token")
+                .addParameter("client_id", config.getClientId())
+                .addParameter("client_secret", config.getClientSecret())
+                .addParameter("refresh_token", config.getRefreshToken())
+                .addParameter("redirect_uri", config.getRedirectURL());
         String resp = requestClient.execute();
-        if (resp != null && !resp.isEmpty() && resp.startsWith("{")) {
+        if (resp != null && resp.startsWith("{")) {
             JSONObject respObj = JSONObject.fromObject(resp);
             if (respObj.has("access_token")) {
                 logger.info("New Access token created ");

@@ -1,20 +1,19 @@
 package io.jenkins.plugins.actions.postbuild;
 
-import java.io.IOException;
-import javax.annotation.Nonnull;
+import static io.jenkins.plugins.util.Util.isEmpty;
+
+import java.util.function.Function;
+
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
-import hudson.Extension;
-import hudson.Launcher;
-import hudson.model.AbstractBuild;
-import hudson.model.BuildListener;
-import hudson.util.FormValidation;
-import io.jenkins.plugins.api.ItemAPI;
-import io.jenkins.plugins.Messages;
-import io.jenkins.plugins.actions.ItemPostBuilder;
-import io.jenkins.plugins.actions.PostBuildDescriptor;
 
-import static org.apache.commons.lang.StringUtils.isEmpty;
+import hudson.Extension;
+import hudson.util.FormValidation;
+import io.jenkins.plugins.Messages;
+import io.jenkins.plugins.actions.postbuild.builder.ItemPostBuilder;
+import io.jenkins.plugins.actions.postbuild.descriptor.PostBuildDescriptor;
+import io.jenkins.plugins.api.WorkItemAPI;
+import io.jenkins.plugins.model.Item;
 
 public class AddWorkItem extends ItemPostBuilder {
 
@@ -24,17 +23,16 @@ public class AddWorkItem extends ItemPostBuilder {
         super(prefix, name, description, status, type, priority, duration, assignee, startdate, enddate, customFields);
     }
 
-    public boolean _perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
-            throws InterruptedException, IOException {
-        return new ItemAPI.ItemActionBuilder(prefix, build, listener, item)
-                .build()
-                .create();
+    @Override
+    public String perform(Function<String, String> getValueFromEnviroinmentValue) throws Exception {
+        Item itemForm = getForm();
+        itemForm.setEnviroinmentVaribaleReplacer(getValueFromEnviroinmentValue);
+        return WorkItemAPI.getInstance().addItem(itemForm);
     }
 
     @Extension
     public static class DescriptorImpl extends PostBuildDescriptor {
 
-        @Nonnull
         @Override
         public String getDisplayName() {
             return Messages.create_item();
