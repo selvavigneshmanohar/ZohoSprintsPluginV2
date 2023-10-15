@@ -1,6 +1,7 @@
 package io.jenkins.plugins.actions.pipeline;
 
 import org.jenkinsci.plugins.workflow.steps.StepContext;
+import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import hudson.Extension;
@@ -16,6 +17,11 @@ public class AddItemComment extends ItemPipelineStep {
     @DataBoundConstructor
     public AddItemComment(String prefix, String note) {
         super(prefix, note);
+    }
+
+    @Override
+    public StepExecution start(StepContext context) throws Exception {
+        return new AddItemCommentExecutor(getForm(), context);
     }
 
     @Extension(optional = true)
@@ -38,7 +44,7 @@ public class AddItemComment extends ItemPipelineStep {
         }
 
         protected String execute() throws Exception {
-            return WorkItemAPI.getInstance().addComment((Item) form);
+            return WorkItemAPI.getInstance().addComment((Item) getForm());
         }
 
     }

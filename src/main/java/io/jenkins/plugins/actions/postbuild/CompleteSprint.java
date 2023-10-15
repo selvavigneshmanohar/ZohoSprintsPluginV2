@@ -1,8 +1,6 @@
 
 package io.jenkins.plugins.actions.postbuild;
 
-import java.util.function.Function;
-
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import hudson.Extension;
@@ -23,10 +21,8 @@ public class CompleteSprint extends PostBuild {
     }
 
     @Override
-    public String perform(Function<String, String> getValueFromEnviroinmentValue) throws Exception {
-        Sprint sprint = getForm();
-        sprint.setEnviroinmentVaribaleReplacer(getValueFromEnviroinmentValue);
-        return SprintAPI.getInstance().complete(sprint);
+    public String perform() throws Exception {
+        return SprintAPI.getInstance().complete(getForm());
     }
 
     @Extension

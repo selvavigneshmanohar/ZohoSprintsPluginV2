@@ -1,7 +1,5 @@
 package io.jenkins.plugins.actions.buildstepaction;
 
-import java.util.function.Function;
-
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import hudson.Extension;
@@ -9,7 +7,6 @@ import io.jenkins.plugins.Messages;
 import io.jenkins.plugins.actions.buildstepaction.builder.SprintsStepBuilder;
 import io.jenkins.plugins.actions.buildstepaction.descriptor.BuildStepDescriptorImpl;
 import io.jenkins.plugins.api.SprintAPI;
-import io.jenkins.plugins.model.Sprint;
 
 public class CreateSprint extends SprintsStepBuilder {
 
@@ -20,10 +17,8 @@ public class CreateSprint extends SprintsStepBuilder {
     }
 
     @Override
-    public String perform(Function<String, String> getValueFromEnviroinmentValue) throws Exception {
-        Sprint sprint = getForm();
-        sprint.setEnviroinmentVaribaleReplacer(getValueFromEnviroinmentValue);
-        return SprintAPI.getInstance().create(sprint);
+    public String perform() throws Exception {
+        return SprintAPI.getInstance().create(getForm());
     }
 
     @Extension

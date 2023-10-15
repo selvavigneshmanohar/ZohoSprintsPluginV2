@@ -1,7 +1,6 @@
 package io.jenkins.plugins.actions;
 
 import static io.jenkins.plugins.util.Util.isEmpty;
-import static io.jenkins.plugins.util.Util.replaceEnvVaribaleToValue;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -84,6 +83,11 @@ public class AddWorkItemOnFailure extends SimpleBuildWrapper {
 
     public String getCustomFields() {
         return customFields;
+    }
+
+    private String replaceEnvVaribaleToValue(Run<?, ?> run, final TaskListener listener,
+            final String key) throws IOException, InterruptedException {
+        return run.getEnvironment(listener).expand(key);
     }
 
     @Override

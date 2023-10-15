@@ -4,6 +4,6 @@
           <f:textbox />
         </f:entry>
         <f:entry title="Add Comment " field="note">
-                  <f:textbox />
+                  <f:textarea />
          </f:entry>
 </j:jelly>

@@ -1,7 +1,5 @@
 package io.jenkins.plugins.api;
 
-import java.util.logging.Logger;
-
 import io.jenkins.plugins.exception.ZSprintsException;
 import io.jenkins.plugins.model.Sprint;
 import io.jenkins.plugins.sprints.RequestClient;
@@ -9,7 +7,6 @@ import io.jenkins.plugins.sprints.ZohoClient;
 import net.sf.json.JSONObject;
 
 public class SprintAPI {
-    private static final Logger LOGGER = Logger.getLogger(SprintAPI.class.getName());
     private static final String CREATE_SPRINT_API = "/projects/no-$1/sprints/";
     private static final String UPDATE_SPRINTS_API = "/projects/no-$1/sprints/no-$2/";
     private static final String START_SPRINT_API = UPDATE_SPRINTS_API + "start/";
@@ -66,7 +63,6 @@ public class SprintAPI {
                 sprint.getSprintNumber())
                 .addParameter("action", "complete")
                 .execute();
-        LOGGER.info(response);
         int inProgressItemCount = JSONObject.fromObject(response).optInt("allItemCount", 0);
         if (inProgressItemCount == 0) {
             return "Sprint has been completed successfully";

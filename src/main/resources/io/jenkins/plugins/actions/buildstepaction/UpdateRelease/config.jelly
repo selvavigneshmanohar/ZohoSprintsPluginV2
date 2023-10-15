@@ -7,7 +7,7 @@
             <f:textbox />
         </f:entry>
         <f:entry title="Release Goal" field="goal">
-            <f:textbox />
+            <f:textarea />
         </f:entry>
         <f:entry title="Stage" field="stage">
             <f:textbox />

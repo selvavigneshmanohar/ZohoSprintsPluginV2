@@ -8,7 +8,6 @@ import hudson.model.AbstractProject;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.FormValidation;
-import hudson.util.ListBoxModel;
 import net.sf.json.JSONObject;
 
 public class BuildStepDescriptorImpl extends BuildStepDescriptor<Builder> {
@@ -36,18 +35,6 @@ public class BuildStepDescriptorImpl extends BuildStepDescriptor<Builder> {
 
     public FormValidation doCheckPrefix(@QueryParameter final String prefix) {
         return FormValidation.validateRequired(prefix);
-    }
-
-    public ListBoxModel doFillDurationTypeItems() {
-        ListBoxModel items = new ListBoxModel();
-
-        items.add("Duration", "duration");
-        items.add("Date", "date");
-        return items;
-    }
-
-    public boolean isDurationSelected(String option) {
-        return "duration".equals(option);
     }
 
 }

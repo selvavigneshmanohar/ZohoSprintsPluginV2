@@ -1,7 +1,6 @@
 package io.jenkins.plugins.actions.postbuild.builder;
 
 import java.io.IOException;
-import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -33,7 +32,26 @@ public abstract class PostBuild extends Recorder implements MatrixAggregatable {
         this.form = form;
     }
 
-    public abstract String perform(Function<String, String> getValueFromEnviroinmentValue) throws Exception;
+    public abstract String perform() throws Exception;
+
+    private final boolean perform(AbstractBuild<?, ?> build, BuildListener listener) {
+        try {
+            form.setEnviroinmentVaribaleReplacer((key) -> {
+                try {
+                    return build.getEnvironment(listener).expand(key);
+                } catch (IOException | InterruptedException e) {
+                    return key;
+                }
+            });
+            String message = perform();
+            listener.getLogger().println("[Zoho Sprints] " + message);
+            return true;
+        } catch (Exception e) {
+            listener.error(e.getMessage());
+            LOGGER.log(Level.WARNING, "", e);
+        }
+        return false;
+    }
 
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
@@ -41,23 +59,7 @@ public abstract class PostBuild extends Recorder implements MatrixAggregatable {
         if (build instanceof MatrixRun) {
             return true;
         }
-        try {
-            String message = perform((key) -> {
-                try {
-                    return build.getEnvironment(listener).expand(key);
-                } catch (IOException | InterruptedException e) {
-                    return key;
-                }
-            });
-            if (message != null) {
-                listener.getLogger().println("[Zoho Sprints]" + message);
-            }
-            return message != null;
-        } catch (Exception e) {
-            listener.error(e.getMessage());
-            LOGGER.log(Level.WARNING, "", e);
-        }
-        return false;
+        return perform(build, listener);
     }
 
     @Override
@@ -70,23 +72,7 @@ public abstract class PostBuild extends Recorder implements MatrixAggregatable {
         return new MatrixAggregator(build, launcher, listener) {
             @Override
             public boolean endBuild() throws InterruptedException, IOException {
-                try {
-                    String message = perform((key) -> {
-                        try {
-                            return build.getEnvironment(listener).expand(key);
-                        } catch (IOException | InterruptedException e) {
-                            return key;
-                        }
-                    });
-                    if (message != null) {
-                        listener.getLogger().println("[Zoho Sprints]" + message);
-                    }
-                    return message != null;
-                } catch (Exception e) {
-                    listener.error(e.getMessage());
-                    LOGGER.log(Level.WARNING, "", e);
-                }
-                return false;
+                return perform(build, listener);
             }
 
             @Override

@@ -1,7 +1,5 @@
 package io.jenkins.plugins.actions.postbuild;
 
-import java.util.function.Function;
-
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
@@ -12,7 +10,6 @@ import io.jenkins.plugins.Messages;
 import io.jenkins.plugins.actions.postbuild.builder.SprintsPostBuilder;
 import io.jenkins.plugins.actions.postbuild.descriptor.PostBuildDescriptor;
 import io.jenkins.plugins.api.SprintAPI;
-import io.jenkins.plugins.model.Sprint;
 
 public class AddSprintComment extends SprintsPostBuilder {
 
@@ -22,10 +19,8 @@ public class AddSprintComment extends SprintsPostBuilder {
     }
 
     @Override
-    public String perform(Function<String, String> getValueFromEnviroinmentValue) throws Exception {
-        Sprint sprint = getForm();
-        sprint.setEnviroinmentVaribaleReplacer(getValueFromEnviroinmentValue);
-        return SprintAPI.getInstance().addComment(sprint);
+    public String perform() throws Exception {
+        return SprintAPI.getInstance().addComment(getForm());
     }
 
     @Extension

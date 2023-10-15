@@ -1,9 +1,5 @@
 package io.jenkins.plugins.actions.buildstepaction;
 
-import static io.jenkins.plugins.util.Util.isEmpty;
-
-import java.util.function.Function;
-
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
@@ -13,7 +9,6 @@ import io.jenkins.plugins.Messages;
 import io.jenkins.plugins.actions.buildstepaction.builder.ItemStepBuilder;
 import io.jenkins.plugins.actions.buildstepaction.descriptor.BuildStepDescriptorImpl;
 import io.jenkins.plugins.api.WorkItemAPI;
-import io.jenkins.plugins.model.Item;
 
 public class AddWorkItem extends ItemStepBuilder {
 
@@ -24,10 +19,8 @@ public class AddWorkItem extends ItemStepBuilder {
     }
 
     @Override
-    public String perform(Function<String, String> getValueFromEnviroinmentValue) throws Exception {
-        Item itemForm = getForm();
-        itemForm.setEnviroinmentVaribaleReplacer(getValueFromEnviroinmentValue);
-        return WorkItemAPI.getInstance().addItem(itemForm);
+    public String perform() throws Exception {
+        return WorkItemAPI.getInstance().addItem(getForm());
     }
 
     @Extension
@@ -38,30 +31,18 @@ public class AddWorkItem extends ItemStepBuilder {
         }
 
         public FormValidation doCheckName(@QueryParameter final String name) {
-            if (!name.isEmpty()) {
-                return FormValidation.ok();
-            }
             return FormValidation.validateRequired(name);
         }
 
         public FormValidation doCheckStatus(@QueryParameter final String status) {
-            if (!isEmpty(status)) {
-                return FormValidation.ok();
-            }
             return FormValidation.validateRequired(status);
         }
 
         public FormValidation doCheckType(@QueryParameter final String type) {
-            if (!isEmpty(type)) {
-                return FormValidation.ok();
-            }
             return FormValidation.validateRequired(type);
         }
 
         public FormValidation doCheckPriority(@QueryParameter final String priority) {
-            if (!isEmpty(priority)) {
-                return FormValidation.ok();
-            }
             return FormValidation.validateRequired(priority);
         }
 

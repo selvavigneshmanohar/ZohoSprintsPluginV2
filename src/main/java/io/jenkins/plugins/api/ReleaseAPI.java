@@ -1,7 +1,5 @@
 package io.jenkins.plugins.api;
 
-import java.util.logging.Logger;
-
 import io.jenkins.plugins.exception.ZSprintsException;
 import io.jenkins.plugins.model.Release;
 import io.jenkins.plugins.sprints.RequestClient;
@@ -11,7 +9,6 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 public final class ReleaseAPI {
-    private static final Logger LOGGER = Logger.getLogger(ReleaseAPI.class.getName());
     private static final String CREATE_RELEASE_API = "/projects/no-$1/release/";
     private static final String UPDATE_RELEASE_API = "/projects/no-$1/release/no-$2/update/";
     private static final String ADD_COMMENT_API = "/projects/no-$1/release/no-$2/notes/";

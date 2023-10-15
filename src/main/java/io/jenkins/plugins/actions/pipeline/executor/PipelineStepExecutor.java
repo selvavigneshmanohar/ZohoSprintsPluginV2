@@ -10,11 +10,16 @@ import hudson.model.TaskListener;
 import io.jenkins.plugins.model.BaseModel;
 
 public class PipelineStepExecutor extends SynchronousNonBlockingStepExecution<Void> {
-    protected BaseModel form;
+    private static final long serialVersionUID = 8003836385443570257L;
+    transient BaseModel form;
 
     public PipelineStepExecutor(BaseModel form, StepContext context) {
         super(context);
         this.form = form;
+    }
+
+    public BaseModel getForm() {
+        return form;
     }
 
     protected String execute() throws Exception {
@@ -35,9 +40,7 @@ public class PipelineStepExecutor extends SynchronousNonBlockingStepExecution<Vo
             });
 
             String message = execute();
-            if (message != null) {
-                listener.getLogger().println("[Zoho Sprints]" + message);
-            }
+            listener.getLogger().println("[Zoho Sprints] " + message);
         } catch (Exception e) {
             listener.error(e.getMessage());
         }

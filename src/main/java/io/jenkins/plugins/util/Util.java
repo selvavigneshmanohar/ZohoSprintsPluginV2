@@ -1,14 +1,8 @@
 package io.jenkins.plugins.util;
 
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
-import java.util.logging.Logger;
 
-import hudson.model.AbstractBuild;
-import hudson.model.BuildListener;
-import hudson.model.Run;
-import hudson.model.TaskListener;
 import io.jenkins.plugins.configuration.ZSConnectionConfiguration;
 import io.jenkins.plugins.sprints.RequestClient;
 import io.jenkins.plugins.sprints.ZohoClient;
@@ -16,38 +10,8 @@ import jenkins.model.Jenkins;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
-/**
- * @author selvavignesh.m
- * @version 1.0
- */
 public class Util {
-    private static final Logger LOGGER = Logger.getLogger(Util.class.getName());
     private static final String GET_PROJECT_USER_API = "/projects/no-$1/user/details/";
-
-    public static String replaceEnvVaribaleToValue(final AbstractBuild<?, ?> build, final BuildListener listener,
-            final String key) throws IOException, InterruptedException {
-        return build.getEnvironment(listener).expand(key);
-    }
-
-    public static String replaceEnvVaribaleToValue(Run<?, ?> run, final TaskListener listener,
-            final String key) throws IOException, InterruptedException {
-        return run.getEnvironment(listener).expand(key);
-    }
-
-    /**
-     * While write a messge in console Log Zoho Sprints message alone higlighted
-     * with Product name
-     * 
-     * @param message Meesage to parse for Sprints Plugin
-     * @return Prepend ZohoSprints in logger
-     */
-    public static String sprintsLogparser(final String message, final boolean isError) {
-        StringBuffer buffer = new StringBuffer("[Zoho Sprints] ");
-        if (isError) {
-            buffer.append("[ Error ] ");
-        }
-        return buffer.append(message).toString();
-    }
 
     public static JSONArray getZSUserIds(String projectNumber, String mailIds)
             throws Exception {

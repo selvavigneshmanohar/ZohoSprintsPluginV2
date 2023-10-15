@@ -30,7 +30,6 @@ public class ZohoClient {
     }
 
     public ZohoClient addParameter(String key, String value) {
-        logger.info("Key -->" + key + "  value -->" + value);
         if (value != null && !value.trim().isEmpty()) {
             queryParam.put(key, value);
         }
@@ -43,7 +42,6 @@ public class ZohoClient {
     }
 
     public ZohoClient addParameter(String key, JSONArray value) {
-        logger.log(Level.INFO, "Key - {0} Value - {0}", new Object[] { key, value });
         if (value != null && !value.isEmpty()) {
             queryParam.put(key, value);
         }
@@ -55,6 +53,7 @@ public class ZohoClient {
     }
 
     public String execute() throws Exception {
+        logger.info(queryParam.toString());
         isOAuthTokenAvailable();
         @SuppressWarnings("DLS_DEAD_LOCAL_STORE")
         RequestClient client = new RequestClient(api, method, relativeUrlParams)
@@ -74,7 +73,6 @@ public class ZohoClient {
     }
 
     private boolean isOAuthExpired(RequestClient client, String response) {
-        logger.info("" + JSONObject.fromObject(response).optInt("code", 0));
         return client.getResponsecode() == HttpServletResponse.SC_BAD_REQUEST &&
                 JSONObject.fromObject(response).optInt("code", 0) == 7601;
     }

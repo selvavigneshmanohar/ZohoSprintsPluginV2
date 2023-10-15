@@ -1,8 +1,5 @@
 package io.jenkins.plugins.actions.postbuild;
 
-import java.util.function.Function;
-
-import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
@@ -12,7 +9,6 @@ import io.jenkins.plugins.Messages;
 import io.jenkins.plugins.actions.postbuild.builder.ItemPostBuilder;
 import io.jenkins.plugins.actions.postbuild.descriptor.PostBuildDescriptor;
 import io.jenkins.plugins.api.WorkItemAPI;
-import io.jenkins.plugins.model.Item;
 
 public class AddItemComment extends ItemPostBuilder {
 
@@ -22,20 +18,15 @@ public class AddItemComment extends ItemPostBuilder {
     }
 
     @Override
-    public String perform(Function<String, String> getValueFromEnviroinmentValue) throws Exception {
-        Item itemForm = getForm();
-        itemForm.setEnviroinmentVaribaleReplacer(getValueFromEnviroinmentValue);
-        return WorkItemAPI.getInstance().addComment(itemForm);
+    public String perform() throws Exception {
+        return WorkItemAPI.getInstance().addComment(getForm());
     }
 
     @Extension
     public static class DescriptorImpl extends PostBuildDescriptor {
 
         public FormValidation doCheckNote(@QueryParameter final String note) {
-            if (StringUtils.isEmpty(note)) {
-                return FormValidation.validateRequired(note);
-            }
-            return FormValidation.ok();
+            return FormValidation.validateRequired(note);
         }
 
         @Override

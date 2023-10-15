@@ -1,6 +1,7 @@
 package io.jenkins.plugins.actions.pipeline;
 
 import org.jenkinsci.plugins.workflow.steps.StepContext;
+import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import hudson.Extension;
@@ -19,6 +20,11 @@ public class CreateRelease extends ReleasePipelineStep {
             String startdate,
             String enddate, String customFields) {
         super(prefix, name, owners, goal, stage, startdate, enddate, customFields);
+    }
+
+    @Override
+    public StepExecution start(StepContext context) throws Exception {
+        return new CreateReleaseExecutor(getForm(), context);
     }
 
     @Extension(optional = true)
@@ -41,7 +47,7 @@ public class CreateRelease extends ReleasePipelineStep {
         }
 
         protected String execute() throws Exception {
-            return ReleaseAPI.getInstance().create((Release) form);
+            return ReleaseAPI.getInstance().create((Release) getForm());
         }
 
     }

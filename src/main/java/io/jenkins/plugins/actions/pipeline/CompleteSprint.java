@@ -1,6 +1,7 @@
 package io.jenkins.plugins.actions.pipeline;
 
 import org.jenkinsci.plugins.workflow.steps.StepContext;
+import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import hudson.Extension;
@@ -22,6 +23,11 @@ public class CompleteSprint extends PipelineStep {
         return (Sprint) super.getForm();
     }
 
+    @Override
+    public StepExecution start(StepContext context) throws Exception {
+        return new CompleteSprintExecutor(getForm(), context);
+    }
+
     @Extension(optional = true)
     public static final class DescriptorImpl extends PipelineStepDescriptor {
         @Override
@@ -41,7 +47,7 @@ public class CompleteSprint extends PipelineStep {
         }
 
         protected String execute() throws Exception {
-            return SprintAPI.getInstance().complete((Sprint) form);
+            return SprintAPI.getInstance().complete((Sprint) getForm());
         }
     }
 

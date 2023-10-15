@@ -1,7 +1,6 @@
 package io.jenkins.plugins.actions.buildstepaction.builder;
 
 import java.io.IOException;
-import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -28,23 +27,24 @@ public abstract class BuildStep extends Builder {
         this.form = form;
     }
 
-    public abstract String perform(Function<String, String> getValueFromEnviroinmentValue) throws Exception;
+    // public abstract String perform(Function<String, String>
+    // getValueFromEnviroinmentValue) throws Exception;
+    public abstract String perform() throws Exception;
 
     @Override
     public final boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
             throws InterruptedException, IOException {
         try {
-            String message = perform((key) -> {
+            form.setEnviroinmentVaribaleReplacer((key) -> {
                 try {
                     return build.getEnvironment(listener).expand(key);
                 } catch (IOException | InterruptedException e) {
                     return key;
                 }
             });
-            if (message != null) {
-                listener.getLogger().println("[Zoho Sprints]" + message);
-            }
-            return message != null;
+            String message = perform();
+            listener.getLogger().println("[Zoho Sprints] " + message);
+            return true;
         } catch (Exception e) {
             listener.error(e.getMessage());
             LOGGER.log(Level.WARNING, "", e);

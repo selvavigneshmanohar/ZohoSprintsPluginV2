@@ -1,7 +1,5 @@
 package io.jenkins.plugins.actions.postbuild;
 
-import java.util.function.Function;
-
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import hudson.Extension;
@@ -9,7 +7,6 @@ import io.jenkins.plugins.Messages;
 import io.jenkins.plugins.actions.postbuild.builder.ItemPostBuilder;
 import io.jenkins.plugins.actions.postbuild.descriptor.PostBuildDescriptor;
 import io.jenkins.plugins.api.WorkItemAPI;
-import io.jenkins.plugins.model.Item;
 
 public class UpdateWorkItem extends ItemPostBuilder {
 
@@ -20,10 +17,8 @@ public class UpdateWorkItem extends ItemPostBuilder {
     }
 
     @Override
-    public String perform(Function<String, String> getValueFromEnviroinmentValue) throws Exception {
-        Item itemForm = getForm();
-        itemForm.setEnviroinmentVaribaleReplacer(getValueFromEnviroinmentValue);
-        return WorkItemAPI.getInstance().updateItem(itemForm);
+    public String perform() throws Exception {
+        return WorkItemAPI.getInstance().updateItem(getForm());
     }
 
     @Extension

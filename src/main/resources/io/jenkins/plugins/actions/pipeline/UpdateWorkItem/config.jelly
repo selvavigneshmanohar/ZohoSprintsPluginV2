@@ -10,7 +10,7 @@
     </f:entry>
 
     <f:entry title="Item Description" field="description">
-        <f:textbox />
+        <f:textarea />
     </f:entry>
     <f:entry title="Item Assignee" field="assignee">
         <f:textbox/>

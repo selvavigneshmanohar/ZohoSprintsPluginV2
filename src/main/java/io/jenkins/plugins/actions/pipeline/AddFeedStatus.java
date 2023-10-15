@@ -1,6 +1,7 @@
 package io.jenkins.plugins.actions.pipeline;
 
 import org.jenkinsci.plugins.workflow.steps.StepContext;
+import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import hudson.Extension;
@@ -25,6 +26,11 @@ public class AddFeedStatus extends PipelineStep {
         return (FeedStatus) super.getForm();
     }
 
+    @Override
+    public StepExecution start(StepContext context) throws Exception {
+        return new AddFeedStatusExecutor(getForm(), context);
+    }
+
     @Extension(optional = true)
     public static final class DescriptorImpl extends PipelineStepDescriptor {
         @Override
@@ -46,7 +52,7 @@ public class AddFeedStatus extends PipelineStep {
 
         @Override
         protected String execute() throws Exception {
-            return new FeedStatusAPI().addFeed((FeedStatus) form);
+            return new FeedStatusAPI().addFeed((FeedStatus) getForm());
         }
 
     }

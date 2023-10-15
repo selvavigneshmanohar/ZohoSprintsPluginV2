@@ -1,7 +1,7 @@
 package io.jenkins.plugins.actions.buildstepaction;
 
-import java.util.function.Function;
 import org.kohsuke.stapler.DataBoundConstructor;
+
 import hudson.Extension;
 import io.jenkins.plugins.Messages;
 import io.jenkins.plugins.actions.buildstepaction.builder.BuildStep;
@@ -21,10 +21,8 @@ public class CompleteSprint extends BuildStep {
     }
 
     @Override
-    public String perform(Function<String, String> getValueFromEnviroinmentValue) throws Exception {
-        Sprint sprint = getForm();
-        sprint.setEnviroinmentVaribaleReplacer(getValueFromEnviroinmentValue);
-        return SprintAPI.getInstance().complete(sprint);
+    public String perform() throws Exception {
+        return SprintAPI.getInstance().complete(getForm());
     }
 
     @Extension

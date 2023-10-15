@@ -1,7 +1,5 @@
 package io.jenkins.plugins.actions.buildstepaction;
 
-import java.util.function.Function;
-
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import hudson.Extension;
@@ -9,7 +7,6 @@ import io.jenkins.plugins.Messages;
 import io.jenkins.plugins.actions.buildstepaction.builder.ReleaseStepBuilder;
 import io.jenkins.plugins.actions.buildstepaction.descriptor.BuildStepDescriptorImpl;
 import io.jenkins.plugins.api.ReleaseAPI;
-import io.jenkins.plugins.model.Release;
 
 public class UpdateRelease extends ReleaseStepBuilder {
 
@@ -20,10 +17,8 @@ public class UpdateRelease extends ReleaseStepBuilder {
     }
 
     @Override
-    public String perform(Function<String, String> getValueFromEnviroinmentValue) throws Exception {
-        Release release = getForm();
-        release.setEnviroinmentVaribaleReplacer(getValueFromEnviroinmentValue);
-        return ReleaseAPI.getInstance().update(release);
+    public String perform() throws Exception {
+        return ReleaseAPI.getInstance().update(getForm());
     }
 
     @Extension

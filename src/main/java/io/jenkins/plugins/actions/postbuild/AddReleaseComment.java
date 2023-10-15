@@ -1,8 +1,5 @@
 package io.jenkins.plugins.actions.postbuild;
 
-import java.util.function.Function;
-
-import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
@@ -11,7 +8,6 @@ import io.jenkins.plugins.Messages;
 import io.jenkins.plugins.actions.postbuild.builder.ReleasePostBuilder;
 import io.jenkins.plugins.actions.postbuild.descriptor.PostBuildDescriptor;
 import io.jenkins.plugins.api.ReleaseAPI;
-import io.jenkins.plugins.model.Release;
 
 public class AddReleaseComment extends ReleasePostBuilder {
 
@@ -21,20 +17,15 @@ public class AddReleaseComment extends ReleasePostBuilder {
     }
 
     @Override
-    public String perform(Function<String, String> getValueFromEnviroinmentValue) throws Exception {
-        Release release = getForm();
-        release.setEnviroinmentVaribaleReplacer(getValueFromEnviroinmentValue);
-        return ReleaseAPI.getInstance().addComment(release);
+    public String perform() throws Exception {
+        return ReleaseAPI.getInstance().addComment(getForm());
     }
 
     // @Extension
     public static class DescriptorImpl extends PostBuildDescriptor {
 
         public FormValidation doCheckNote(@QueryParameter final String note) {
-            if (StringUtils.isEmpty(note)) {
-                return FormValidation.validateRequired(note);
-            }
-            return FormValidation.ok();
+            return FormValidation.validateRequired(note);
         }
 
         @Override

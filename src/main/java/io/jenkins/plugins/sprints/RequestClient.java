@@ -92,7 +92,6 @@ public class RequestClient {
     }
 
     private HttpEntityEnclosingRequestBase setJSONBodyEntity(HttpEntityEnclosingRequestBase reqobject) {
-        LOGGER.info(JSONObject.fromObject(queryParam).toString());
         StringEntity entity = new StringEntity(JSONObject.fromObject(queryParam).toString(), CHARSET);
         reqobject.setEntity(entity);
         return reqobject;
@@ -159,8 +158,6 @@ public class RequestClient {
      * @throws Exception Throws when any error occurs
      */
     public String execute() throws Exception {
-        LOGGER.info(queryParam.toString());
-        LOGGER.info(JSONObject.fromObject(queryParam).toString());
         int connectionTimeOut = 30000;
         int socketTimeOut = 30000;
         String resp = "";
@@ -253,11 +250,7 @@ public class RequestClient {
             List<NameValuePair> entityList = new ArrayList<>();
             for (Map.Entry<String, Object> entry : queryParam.entrySet()) {
                 Object value = entry.getValue();
-                if (value != null && value.toString().length() > 0) {
-                    entityList.add(new BasicNameValuePair(entry.getKey(),
-                            buildUtility != null ? buildUtility.replaceEnvVaribaleToValue(value.toString())
-                                    : value.toString()));
-                }
+                entityList.add(new BasicNameValuePair(entry.getKey(), value.toString()));
 
             }
             post.setEntity(new UrlEncodedFormEntity(entityList));

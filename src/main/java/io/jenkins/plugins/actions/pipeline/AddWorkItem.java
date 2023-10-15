@@ -1,6 +1,7 @@
 package io.jenkins.plugins.actions.pipeline;
 
 import org.jenkinsci.plugins.workflow.steps.StepContext;
+import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import hudson.Extension;
@@ -18,6 +19,11 @@ public class AddWorkItem extends ItemPipelineStep {
     public AddWorkItem(String prefix, String name, String description, String status, String type, String priority,
             String duration, String startdate, String enddate, String customFields, String assignee) {
         super(prefix, name, description, status, type, priority, duration, assignee, startdate, enddate, customFields);
+    }
+
+    @Override
+    public StepExecution start(StepContext context) throws Exception {
+        return new AddWorkItemExecutor(getForm(), context);
     }
 
     @Extension(optional = true)
@@ -41,7 +47,7 @@ public class AddWorkItem extends ItemPipelineStep {
         }
 
         protected String execute() throws Exception {
-            return WorkItemAPI.getInstance().addItem((Item) form);
+            return WorkItemAPI.getInstance().addItem((Item) getForm());
         }
     }
 }

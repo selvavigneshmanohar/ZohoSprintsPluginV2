@@ -1,7 +1,5 @@
 package io.jenkins.plugins.actions.buildstepaction;
 
-import java.util.function.Function;
-
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
@@ -28,10 +26,8 @@ public class AddFeedStatus extends BuildStep {
     }
 
     @Override
-    public String perform(Function<String, String> getValueFromEnviroinmentValue) throws Exception {
-        FeedStatus feed = getForm();
-        feed.setEnviroinmentVaribaleReplacer(getValueFromEnviroinmentValue);
-        return new FeedStatusAPI().addFeed(feed);
+    public String perform() throws Exception {
+        return new FeedStatusAPI().addFeed(getForm());
     }
 
     @Extension

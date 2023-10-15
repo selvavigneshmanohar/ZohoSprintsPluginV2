@@ -10,7 +10,7 @@
     </f:entry>
 
     <f:entry title="Description" field="description">
-        <f:textbox />
+        <f:textarea />
     </f:entry>
     <f:entry title="Assignees" field="assignee">
         <f:textbox/>
@@ -35,7 +35,7 @@
         <f:textbox/>
     </f:entry>
     <f:entry title="Custom Fields" field="customFields">
-        <f:textbox/>
+        <f:textarea />
     </f:entry>
 
 </j:jelly>

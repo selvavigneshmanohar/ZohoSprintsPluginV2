@@ -1,8 +1,5 @@
 package io.jenkins.plugins.actions.buildstepaction;
 
-import java.util.function.Function;
-
-import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
@@ -12,7 +9,6 @@ import io.jenkins.plugins.Messages;
 import io.jenkins.plugins.actions.buildstepaction.builder.SprintsStepBuilder;
 import io.jenkins.plugins.actions.buildstepaction.descriptor.BuildStepDescriptorImpl;
 import io.jenkins.plugins.api.SprintAPI;
-import io.jenkins.plugins.model.Sprint;
 
 public class AddSprintComment extends SprintsStepBuilder {
     @DataBoundConstructor
@@ -21,20 +17,16 @@ public class AddSprintComment extends SprintsStepBuilder {
     }
 
     @Override
-    public String perform(Function<String, String> getValueFromEnviroinmentValue) throws Exception {
-        Sprint sprint = getForm();
-        sprint.setEnviroinmentVaribaleReplacer(getValueFromEnviroinmentValue);
-        return SprintAPI.getInstance().addComment(sprint);
+    public String perform() throws Exception {
+        return SprintAPI.getInstance().addComment(getForm());
+
     }
 
     @Extension
     public static class DescriptorImpl extends BuildStepDescriptorImpl {
 
         public FormValidation doCheckNote(@QueryParameter final String note) {
-            if (StringUtils.isEmpty(note)) {
-                return FormValidation.validateRequired(note);
-            }
-            return FormValidation.ok();
+            return FormValidation.validateRequired(note);
         }
 
         @Override
@@ -43,4 +35,5 @@ public class AddSprintComment extends SprintsStepBuilder {
         }
 
     }
+
 }

@@ -6,7 +6,7 @@
     </f:entry>
 
     <f:entry title="Status " field="feed">
-        <f:textbox />
+        <f:textarea />
     </f:entry>
 
 </j:jelly>

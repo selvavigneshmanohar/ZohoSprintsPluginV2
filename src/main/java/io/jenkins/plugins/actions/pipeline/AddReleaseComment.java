@@ -1,6 +1,7 @@
 package io.jenkins.plugins.actions.pipeline;
 
 import org.jenkinsci.plugins.workflow.steps.StepContext;
+import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import io.jenkins.plugins.Messages;
@@ -16,6 +17,11 @@ public class AddReleaseComment extends ReleasePipelineStep {
     @DataBoundConstructor
     public AddReleaseComment(String prefix, String note) {
         super(prefix, note);
+    }
+
+    @Override
+    public StepExecution start(StepContext context) throws Exception {
+        return new AddReleaseCommentExecutor(getForm(), context);
     }
 
     // @Extension(optional = true)
@@ -38,7 +44,7 @@ public class AddReleaseComment extends ReleasePipelineStep {
         }
 
         protected String execute() throws Exception {
-            return ReleaseAPI.getInstance().addComment((Release) form);
+            return ReleaseAPI.getInstance().addComment((Release) getForm());
         }
 
     }
