@@ -49,7 +49,7 @@ public class ZSConnectionConfigAPI implements RootAction {
             ZSConnectionConfiguration config = new ZSConnectionConfiguration(configuration);
             config.save();
             try {
-                ZohoClient.generateNewAccessToken();
+                ZohoClient.getInstance().generateNewAccessToken();
                 response.put("status", "success");
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, "Error while OAuth token generation", e);

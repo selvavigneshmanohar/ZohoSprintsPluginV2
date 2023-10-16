@@ -42,15 +42,9 @@ import org.apache.http.util.EntityUtils;
 
 import hudson.ProxyConfiguration;
 import hudson.util.Secret;
-import io.jenkins.plugins.configuration.ZSConnectionConfiguration;
-import io.jenkins.plugins.util.Util;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;;
 
-/**
- * @author selvavignesh.m
- * @version 1.0
- */
 public class RequestClient {
 
     private static final Logger LOGGER = Logger.getLogger(RequestClient.class.getName());
@@ -61,7 +55,6 @@ public class RequestClient {
     private String url;
     private String method;
     private Map<String, Object> queryParam = new HashMap<>();
-
     private Map<String, String> header = new HashMap<>();
     private boolean isJSONBodyContent;
     private int responsecode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
@@ -75,10 +68,14 @@ public class RequestClient {
         return this;
     }
 
-    public RequestClient(final String api, final String method, String[] urlParams)
+    public RequestClient(final String url, final String method, String[] urlParams)
             throws Exception {
+        this.url = constructUri(url, urlParams);
         this.method = method;
-        setZSAPIDetails(constructUri(api, urlParams));
+    }
+
+    public void setHeader(Map<String, String> header) {
+        this.header = header;
     }
 
     public RequestClient setQueryParam(Map<String, Object> queryParam) {
@@ -141,18 +138,6 @@ public class RequestClient {
         return httpreq;
     }
 
-    private void setZSAPIDetails(final String api) throws Exception {
-        ZSConnectionConfiguration conf = Util.getZSConnection();
-        if (api.startsWith(conf.getAccountsDomain())) {
-            this.url = api;
-            return;
-        }
-        header.put("X-ZA-SOURCE", "eiULZMmzMCRXCgFljRnxrA==");
-        header.put("Authorization", "Zoho-oauthtoken " + conf.getAccessToken());
-        this.url = conf.getZSApiPath() + api;
-        LOGGER.info(this.url);
-    }
-
     /**
      * @return String format of response
      * @throws Exception Throws when any error occurs
@@ -166,7 +151,7 @@ public class RequestClient {
         if (isJSONBodyContent) {
             request.setHeader("Content-type", ContentType.APPLICATION_JSON.getMimeType()); // NO I18N
         } else if (request.getHeaders("Content-type") == null) {// NO I18N
-            request.setHeader("Content-type", "application/x-www-form-urlencoded; charset=UTF-8"); // no i18n
+            request.setHeader("Content-type", "application/x-www-form-urlencoded; charset=" + CHARSET); // no i18n
         }
         RequestConfig config = RequestConfig
                 .custom()

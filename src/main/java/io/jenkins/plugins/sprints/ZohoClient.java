@@ -17,10 +17,18 @@ public class ZohoClient {
     private static final Logger logger = Logger.getLogger(ZohoClient.class.getName());
     private int responsecode;
     private Map<String, Object> queryParam = new HashMap<>();
+    private Map<String, String> header = new HashMap<>();
     private String api;
     private String method;
     private String[] relativeUrlParams;
     private boolean isJsonBodyresponse = false;
+
+    private ZohoClient() {
+    }
+
+    public static ZohoClient getInstance() {
+        return new ZohoClient();
+    }
 
     public ZohoClient(String api, String method,
             String... relativeUrlParams) throws Exception {
@@ -59,6 +67,7 @@ public class ZohoClient {
         RequestClient client = new RequestClient(api, method, relativeUrlParams)
                 .setJSONBodyContent(isJsonBodyresponse)
                 .setQueryParam(queryParam);
+        client.setHeader(header);
         String response = client.execute();
         if (isOAuthExpired(client, response)) {
             generateNewAccessToken();
@@ -82,9 +91,14 @@ public class ZohoClient {
         if (config.getAccessToken() != null && config.getAccessToken().length() == 0) {
             generateNewAccessToken();
         }
+        this.api = config.getZSApiPath() + api;
+        header.put("X-ZA-SOURCE", "eiULZMmzMCRXCgFljRnxrA==");
+        header.computeIfAbsent("Authorization", k -> {
+            return "Zoho-oauthtoken " + config.getAccessToken();
+        });
     }
 
-    public static synchronized void generateNewAccessToken() throws Exception {
+    public synchronized void generateNewAccessToken() throws Exception {
         ZSConnectionConfiguration config = Util.getZSConnection();
         logger.info("New Token method called");
         String accessToken = null;
@@ -103,6 +117,7 @@ public class ZohoClient {
                 accessToken = respObj.getString("access_token");
                 config.setAccessToken(accessToken);
                 config.save();
+                header.put("Authorization", "Zoho-oauthtoken " + accessToken);
                 logger.info("New Token generated");
             } else {
                 logger.log(Level.INFO, "Error occurred during new access token creation Error - {0}", resp);
