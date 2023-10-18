@@ -5,11 +5,14 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
+import org.kohsuke.stapler.QueryParameter;
 
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import hudson.util.FormValidation;
+import io.jenkins.plugins.util.Util;
 
-public class PipelineStepDescriptor extends StepDescriptor {
+public abstract class PipelineStepDescriptor extends StepDescriptor {
     @Override
     public Set<? extends Class<?>> getRequiredContext() {
         Set<Class<?>> context = new HashSet<>();
@@ -17,8 +20,11 @@ public class PipelineStepDescriptor extends StepDescriptor {
         return Collections.unmodifiableSet(context);
     }
 
-    @Override
-    public String getFunctionName() {
-        return "";
+    public FormValidation doCheckPrefix(@QueryParameter final String prefix) {
+        return Util.validateRequired(prefix);
+    }
+
+    public FormValidation doCheckNote(@QueryParameter final String note) {
+        return Util.validateRequired(note);
     }
 }

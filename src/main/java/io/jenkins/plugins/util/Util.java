@@ -3,6 +3,7 @@ package io.jenkins.plugins.util;
 import java.util.Iterator;
 import java.util.List;
 
+import hudson.util.FormValidation;
 import io.jenkins.plugins.configuration.ZSConnectionConfiguration;
 import io.jenkins.plugins.sprints.RequestClient;
 import io.jenkins.plugins.sprints.ZohoClient;
@@ -55,5 +56,9 @@ public class Util {
 
     public static boolean isEmpty(String str) {
         return str == null || str.trim().isEmpty();
+    }
+
+    public static FormValidation validateRequired(String value) {
+        return FormValidation.validateRequired(value);
     }
 }

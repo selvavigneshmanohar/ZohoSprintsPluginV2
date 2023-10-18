@@ -51,7 +51,7 @@ public class RequestClient {
     private static final Pattern RELATIVE_URL_PATTERN = Pattern.compile("\\$(\\d{1,2})");
     public static final String METHOD_GET = "get";
     public static final String METHOD_POST = "post";
-    public static final String CHARSET = "UTF-8";
+    public static final String CHARSET = StandardCharsets.UTF_8.name();
     private String url;
     private String method;
     private Map<String, Object> queryParam = new HashMap<>();
@@ -68,8 +68,7 @@ public class RequestClient {
         return this;
     }
 
-    public RequestClient(final String url, final String method, String[] urlParams)
-            throws Exception {
+    public RequestClient(final String url, final String method, String[] urlParams) throws Exception {
         this.url = constructUri(url, urlParams);
         this.method = method;
     }
@@ -103,7 +102,7 @@ public class RequestClient {
         while (matcher.find()) {
             matcher.appendReplacement(urlBuilder,
                     URLEncoder.encode(urlParams[Integer.parseInt(matcher.group(1)) - 1],
-                            StandardCharsets.UTF_8.name()));
+                            CHARSET));
         }
         matcher.appendTail(urlBuilder);
         return urlBuilder.toString();

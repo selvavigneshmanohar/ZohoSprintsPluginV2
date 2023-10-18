@@ -1,5 +1,7 @@
 package io.jenkins.plugins.actions.pipeline;
 
+import java.util.function.Function;
+
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -10,8 +12,7 @@ import io.jenkins.plugins.actions.pipeline.descriptor.PipelineStepDescriptor;
 import io.jenkins.plugins.actions.pipeline.executor.PipelineStepExecutor;
 import io.jenkins.plugins.actions.pipeline.step.ItemPipelineStep;
 import io.jenkins.plugins.api.WorkItemAPI;
-import io.jenkins.plugins.model.BaseModel;
-import io.jenkins.plugins.model.Item;
+import io.jenkins.plugins.exception.ZSprintsException;
 
 public class UpdateWorkItem extends ItemPipelineStep {
 
@@ -23,7 +24,16 @@ public class UpdateWorkItem extends ItemPipelineStep {
 
     @Override
     public StepExecution start(StepContext context) throws Exception {
-        return new UpdateWorkItemExecutor(getForm(), context);
+        setEnvironmentVariableReplacer(context);
+        Function<String, String> executor = (key) -> {
+            try {
+                return WorkItemAPI.getInstance().updateItem(getForm());
+            } catch (Exception e) {
+                throw new ZSprintsException(e.getMessage());
+            }
+
+        };
+        return new PipelineStepExecutor(executor, context);
     }
 
     @Extension(optional = true)
@@ -37,18 +47,6 @@ public class UpdateWorkItem extends ItemPipelineStep {
         public String getDisplayName() {
             return Messages.update_item();
 
-        }
-
-    }
-
-    public static class UpdateWorkItemExecutor extends PipelineStepExecutor {
-
-        protected UpdateWorkItemExecutor(BaseModel form, StepContext context) {
-            super(form, context);
-        }
-
-        protected String execute() throws Exception {
-            return WorkItemAPI.getInstance().updateItem((Item) getForm());
         }
 
     }

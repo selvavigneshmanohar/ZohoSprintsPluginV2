@@ -7,6 +7,7 @@ import hudson.model.AbstractProject;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Publisher;
 import hudson.util.FormValidation;
+import io.jenkins.plugins.util.Util;
 import net.sf.json.JSONObject;
 
 public class PostBuildDescriptor extends BuildStepDescriptor<Publisher> {
@@ -24,6 +25,10 @@ public class PostBuildDescriptor extends BuildStepDescriptor<Publisher> {
     }
 
     public FormValidation doCheckPrefix(@QueryParameter final String prefix) {
-        return FormValidation.validateRequired(prefix);
+        return Util.validateRequired(prefix);
+    }
+
+    public FormValidation doCheckNote(@QueryParameter final String note) {
+        return Util.validateRequired(note);
     }
 }

@@ -1,9 +1,8 @@
 package io.jenkins.plugins.actions.buildstepaction;
 
 import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.QueryParameter;
 
-import hudson.util.FormValidation;
+import hudson.Extension;
 import io.jenkins.plugins.Messages;
 import io.jenkins.plugins.actions.buildstepaction.builder.ReleaseStepBuilder;
 import io.jenkins.plugins.actions.buildstepaction.descriptor.BuildStepDescriptorImpl;
@@ -22,12 +21,8 @@ public class AddReleaseComment extends ReleaseStepBuilder {
 
     }
 
-    // @Extension
+    @Extension
     public static class DescriptorImpl extends BuildStepDescriptorImpl {
-
-        public FormValidation doCheckNote(@QueryParameter final String note) {
-            return FormValidation.validateRequired(note);
-        }
 
         @Override
         public String getDisplayName() {

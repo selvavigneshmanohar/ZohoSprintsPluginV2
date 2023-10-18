@@ -8,18 +8,13 @@ import hudson.model.AbstractProject;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.FormValidation;
+import io.jenkins.plugins.util.Util;
 import net.sf.json.JSONObject;
 
 public class BuildStepDescriptorImpl extends BuildStepDescriptor<Builder> {
     protected BuildStepDescriptorImpl() {
 
     }
-
-    // @Extension
-    // public static final AddFeedStatus.DescriptorImpl addFeedStatus;
-    // static {
-    // addFeedStatus = new AddFeedStatus.DescriptorImpl(AddFeedStatus.class);
-    // }
 
     @Override
     public boolean isApplicable(Class<? extends AbstractProject> jobType) {
@@ -34,7 +29,11 @@ public class BuildStepDescriptorImpl extends BuildStepDescriptor<Builder> {
     }
 
     public FormValidation doCheckPrefix(@QueryParameter final String prefix) {
-        return FormValidation.validateRequired(prefix);
+        return Util.validateRequired(prefix);
+    }
+
+    public FormValidation doCheckNote(@QueryParameter final String note) {
+        return Util.validateRequired(note);
     }
 
 }

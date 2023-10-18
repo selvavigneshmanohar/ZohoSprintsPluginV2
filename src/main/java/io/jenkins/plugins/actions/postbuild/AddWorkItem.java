@@ -9,6 +9,7 @@ import io.jenkins.plugins.Messages;
 import io.jenkins.plugins.actions.postbuild.builder.ItemPostBuilder;
 import io.jenkins.plugins.actions.postbuild.descriptor.PostBuildDescriptor;
 import io.jenkins.plugins.api.WorkItemAPI;
+import io.jenkins.plugins.util.Util;
 
 public class AddWorkItem extends ItemPostBuilder {
 
@@ -32,19 +33,19 @@ public class AddWorkItem extends ItemPostBuilder {
         }
 
         public FormValidation doCheckName(@QueryParameter final String name) {
-            return FormValidation.validateRequired(name);
+            return Util.validateRequired(name);
         }
 
         public FormValidation doCheckStatus(@QueryParameter final String status) {
-            return FormValidation.validateRequired(status);
+            return Util.validateRequired(status);
         }
 
         public FormValidation doCheckType(@QueryParameter final String type) {
-            return FormValidation.validateRequired(type);
+            return Util.validateRequired(type);
         }
 
         public FormValidation doCheckPriority(@QueryParameter final String priority) {
-            return FormValidation.validateRequired(priority);
+            return Util.validateRequired(priority);
         }
 
     }

@@ -1,5 +1,7 @@
 package io.jenkins.plugins.actions.pipeline;
 
+import java.util.function.Function;
+
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -10,7 +12,7 @@ import io.jenkins.plugins.actions.pipeline.descriptor.PipelineStepDescriptor;
 import io.jenkins.plugins.actions.pipeline.executor.PipelineStepExecutor;
 import io.jenkins.plugins.actions.pipeline.step.ItemPipelineStep;
 import io.jenkins.plugins.api.WorkItemAPI;
-import io.jenkins.plugins.model.Item;
+import io.jenkins.plugins.exception.ZSprintsException;
 
 public class AddItemComment extends ItemPipelineStep {
 
@@ -21,7 +23,16 @@ public class AddItemComment extends ItemPipelineStep {
 
     @Override
     public StepExecution start(StepContext context) throws Exception {
-        return new AddItemCommentExecutor(getForm(), context);
+        setEnvironmentVariableReplacer(context);
+        Function<String, String> executor = (key) -> {
+            try {
+                return WorkItemAPI.getInstance().addComment(getForm());
+            } catch (Exception e) {
+                throw new ZSprintsException(e.getMessage());
+            }
+
+        };
+        return new PipelineStepExecutor(executor, context);
     }
 
     @Extension(optional = true)
@@ -35,18 +46,6 @@ public class AddItemComment extends ItemPipelineStep {
         public String getDisplayName() {
             return Messages.add_item_comment();
         }
-    }
-
-    public static class AddItemCommentExecutor extends PipelineStepExecutor {
-
-        protected AddItemCommentExecutor(Item form, StepContext context) {
-            super(form, context);
-        }
-
-        protected String execute() throws Exception {
-            return WorkItemAPI.getInstance().addComment((Item) getForm());
-        }
-
     }
 
 }

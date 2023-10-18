@@ -30,8 +30,7 @@ public class ZohoClient {
         return new ZohoClient();
     }
 
-    public ZohoClient(String api, String method,
-            String... relativeUrlParams) throws Exception {
+    public ZohoClient(String api, String method, String... relativeUrlParams) {
         this.api = api;
         this.method = method;
         this.relativeUrlParams = relativeUrlParams;

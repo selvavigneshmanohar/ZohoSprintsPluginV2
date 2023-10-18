@@ -27,8 +27,6 @@ public abstract class BuildStep extends Builder {
         this.form = form;
     }
 
-    // public abstract String perform(Function<String, String>
-    // getValueFromEnviroinmentValue) throws Exception;
     public abstract String perform() throws Exception;
 
     @Override

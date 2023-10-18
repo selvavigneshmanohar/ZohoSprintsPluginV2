@@ -1,5 +1,7 @@
 package io.jenkins.plugins.actions.pipeline;
 
+import java.util.function.Function;
+
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -10,8 +12,7 @@ import io.jenkins.plugins.actions.pipeline.descriptor.PipelineStepDescriptor;
 import io.jenkins.plugins.actions.pipeline.executor.PipelineStepExecutor;
 import io.jenkins.plugins.actions.pipeline.step.SprintsPipelineStep;
 import io.jenkins.plugins.api.SprintAPI;
-import io.jenkins.plugins.model.BaseModel;
-import io.jenkins.plugins.model.Sprint;
+import io.jenkins.plugins.exception.ZSprintsException;
 
 public class StartSprint extends SprintsPipelineStep {
     @DataBoundConstructor
@@ -21,7 +22,16 @@ public class StartSprint extends SprintsPipelineStep {
 
     @Override
     public StepExecution start(StepContext context) throws Exception {
-        return new StartSprintExecutor(getForm(), context);
+        setEnvironmentVariableReplacer(context);
+        Function<String, String> executor = (key) -> {
+            try {
+                return SprintAPI.getInstance().start(getForm());
+            } catch (Exception e) {
+                throw new ZSprintsException(e.getMessage());
+            }
+
+        };
+        return new PipelineStepExecutor(executor, context);
     }
 
     @Extension(optional = true)
@@ -34,17 +44,6 @@ public class StartSprint extends SprintsPipelineStep {
         @Override
         public String getDisplayName() {
             return Messages.update_sprint_start();
-        }
-    }
-
-    public static class StartSprintExecutor extends PipelineStepExecutor {
-
-        protected StartSprintExecutor(BaseModel form, StepContext context) {
-            super(form, context);
-        }
-
-        protected String execute() throws Exception {
-            return SprintAPI.getInstance().start((Sprint) getForm());
         }
     }
 

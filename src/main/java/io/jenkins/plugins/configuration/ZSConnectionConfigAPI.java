@@ -1,6 +1,5 @@
 package io.jenkins.plugins.configuration;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletResponse;
@@ -12,7 +11,6 @@ import org.kohsuke.stapler.verb.POST;
 
 import hudson.Extension;
 import hudson.model.RootAction;
-import io.jenkins.plugins.sprints.ZohoClient;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 
@@ -48,16 +46,6 @@ public class ZSConnectionConfigAPI implements RootAction {
         } else {
             ZSConnectionConfiguration config = new ZSConnectionConfiguration(configuration);
             config.save();
-            try {
-                ZohoClient.getInstance().generateNewAccessToken();
-                response.put("status", "success");
-            } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "Error while OAuth token generation", e);
-                doReset();
-                response.put("status", "failed");
-                statusCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
-            }
-
         }
         return new JsonHttpResponse(response, statusCode);
     }

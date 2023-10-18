@@ -1,16 +1,22 @@
 package io.jenkins.plugins.actions.pipeline;
 
+import java.util.function.Function;
+
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.QueryParameter;
 
 import hudson.Extension;
+import hudson.util.FormValidation;
 import io.jenkins.plugins.Messages;
 import io.jenkins.plugins.actions.pipeline.descriptor.PipelineStepDescriptor;
 import io.jenkins.plugins.actions.pipeline.executor.PipelineStepExecutor;
 import io.jenkins.plugins.actions.pipeline.step.PipelineStep;
 import io.jenkins.plugins.api.FeedStatusAPI;
+import io.jenkins.plugins.exception.ZSprintsException;
 import io.jenkins.plugins.model.FeedStatus;
+import io.jenkins.plugins.util.Util;
 
 public class AddFeedStatus extends PipelineStep {
     @DataBoundConstructor
@@ -28,10 +34,19 @@ public class AddFeedStatus extends PipelineStep {
 
     @Override
     public StepExecution start(StepContext context) throws Exception {
-        return new AddFeedStatusExecutor(getForm(), context);
+        setEnvironmentVariableReplacer(context);
+        Function<String, String> executor = (key) -> {
+            try {
+                return new FeedStatusAPI().addFeed((FeedStatus) getForm());
+            } catch (Exception e) {
+                throw new ZSprintsException(e.getMessage());
+            }
+
+        };
+        return new PipelineStepExecutor(executor, context);
     }
 
-    @Extension(optional = true)
+    @Extension
     public static final class DescriptorImpl extends PipelineStepDescriptor {
         @Override
         public String getFunctionName() {
@@ -42,18 +57,9 @@ public class AddFeedStatus extends PipelineStep {
         public String getDisplayName() {
             return Messages.add_feed_status();
         }
-    }
 
-    public static class AddFeedStatusExecutor extends PipelineStepExecutor {
-
-        protected AddFeedStatusExecutor(FeedStatus form, StepContext context) {
-            super(form, context);
+        public FormValidation doCheckFeed(@QueryParameter final String feed) {
+            return Util.validateRequired(feed);
         }
-
-        @Override
-        protected String execute() throws Exception {
-            return new FeedStatusAPI().addFeed((FeedStatus) getForm());
-        }
-
     }
 }

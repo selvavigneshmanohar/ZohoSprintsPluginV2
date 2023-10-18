@@ -23,6 +23,7 @@ import hudson.model.TaskListener;
 import hudson.tasks.BuildWrapperDescriptor;
 import hudson.util.FormValidation;
 import io.jenkins.plugins.Messages;
+import io.jenkins.plugins.util.Util;
 import jenkins.tasks.SimpleBuildWrapper;
 import net.sf.json.JSONObject;
 
@@ -140,11 +141,11 @@ public class AddWorkItemOnFailure extends SimpleBuildWrapper {
         }
 
         public FormValidation doCheckPrefix(@QueryParameter final String prefix) {
-            return FormValidation.validateRequired(prefix);
+            return Util.validateRequired(prefix);
         }
 
         public FormValidation doCheckName(@QueryParameter final String name) {
-            return FormValidation.validateRequired(name);
+            return Util.validateRequired(name);
         }
 
         @Override
@@ -158,21 +159,21 @@ public class AddWorkItemOnFailure extends SimpleBuildWrapper {
             if (!isEmpty(status)) {
                 return FormValidation.ok();
             }
-            return FormValidation.validateRequired(status);
+            return Util.validateRequired(status);
         }
 
         public FormValidation doCheckType(@QueryParameter final String type) {
             if (!isEmpty(type)) {
                 return FormValidation.ok();
             }
-            return FormValidation.validateRequired(type);
+            return Util.validateRequired(type);
         }
 
         public FormValidation doCheckPriority(@QueryParameter final String priority) {
             if (!isEmpty(priority)) {
                 return FormValidation.ok();
             }
-            return FormValidation.validateRequired(priority);
+            return Util.validateRequired(priority);
         }
     }
 }

@@ -10,6 +10,7 @@ import io.jenkins.plugins.actions.postbuild.builder.PostBuild;
 import io.jenkins.plugins.actions.postbuild.descriptor.PostBuildDescriptor;
 import io.jenkins.plugins.api.FeedStatusAPI;
 import io.jenkins.plugins.model.FeedStatus;
+import io.jenkins.plugins.util.Util;
 
 public class AddFeedStatus extends PostBuild {
 
@@ -35,7 +36,7 @@ public class AddFeedStatus extends PostBuild {
     public static class DescriptorImpl extends PostBuildDescriptor {
 
         public FormValidation doCheckFeed(@QueryParameter final String feed) {
-            return FormValidation.validateRequired(feed);
+            return Util.validateRequired(feed);
         }
 
         @Override
