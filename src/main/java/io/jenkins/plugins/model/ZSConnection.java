@@ -1,6 +1,6 @@
-package io.jenkins.plugins.configuration;
+package io.jenkins.plugins.model;
 
-import static io.jenkins.plugins.util.Util.isEmpty;
+import static io.jenkins.plugins.Util.isEmpty;
 
 import java.util.Objects;
 

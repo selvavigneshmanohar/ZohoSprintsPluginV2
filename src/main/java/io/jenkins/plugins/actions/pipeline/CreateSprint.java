@@ -10,12 +10,12 @@ import org.kohsuke.stapler.QueryParameter;
 import hudson.Extension;
 import hudson.util.FormValidation;
 import io.jenkins.plugins.Messages;
+import io.jenkins.plugins.Util;
 import io.jenkins.plugins.actions.pipeline.descriptor.PipelineStepDescriptor;
 import io.jenkins.plugins.actions.pipeline.executor.PipelineStepExecutor;
 import io.jenkins.plugins.actions.pipeline.step.SprintsPipelineStep;
 import io.jenkins.plugins.api.SprintAPI;
 import io.jenkins.plugins.exception.ZSprintsException;
-import io.jenkins.plugins.util.Util;
 
 public class CreateSprint extends SprintsPipelineStep {
 

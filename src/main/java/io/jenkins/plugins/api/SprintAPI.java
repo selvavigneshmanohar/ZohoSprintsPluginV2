@@ -1,11 +1,12 @@
 package io.jenkins.plugins.api;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import io.jenkins.plugins.Util;
 import io.jenkins.plugins.exception.ZSprintsException;
 import io.jenkins.plugins.model.Sprint;
 import io.jenkins.plugins.sprints.ZohoClient;
-import io.jenkins.plugins.util.Util;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
 
 public class SprintAPI {
     private static final String CREATE_SPRINT_API = "/projects/no-$1/sprints/";
@@ -45,7 +46,7 @@ public class SprintAPI {
             client.addParameter("users", sprintUsers);
         }
         String response = client.execute();
-        String message = JSONObject.fromObject(response).optString("message", null);
+        String message = new JSONObject(response).optString("message", null);
         if (message == null) {
             return "Sprint added successfully";
         }
@@ -62,7 +63,7 @@ public class SprintAPI {
                 .addParameter("enddate", sprint.getEnddate())
                 .execute();
 
-        String message = JSONObject.fromObject(response).optString("message", null);
+        String message = new JSONObject(response).optString("message", null);
         if (message == null) {
             return "Sprint updated successfully";
         }
@@ -80,7 +81,7 @@ public class SprintAPI {
                 sprint.getSprintNumber())
                 .addParameter("action", "complete")
                 .execute();
-        int inProgressItemCount = JSONObject.fromObject(response).optInt("allItemCount", 0);
+        int inProgressItemCount = new JSONObject(response).optInt("allItemCount", 0);
         if (inProgressItemCount == 0) {
             return "Sprint has been completed successfully";
         }

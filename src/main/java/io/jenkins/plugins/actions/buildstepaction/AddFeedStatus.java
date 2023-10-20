@@ -6,11 +6,11 @@ import org.kohsuke.stapler.QueryParameter;
 import hudson.Extension;
 import hudson.util.FormValidation;
 import io.jenkins.plugins.Messages;
+import io.jenkins.plugins.Util;
 import io.jenkins.plugins.actions.buildstepaction.builder.BuildStep;
 import io.jenkins.plugins.actions.buildstepaction.descriptor.BuildStepDescriptorImpl;
 import io.jenkins.plugins.api.FeedStatusAPI;
 import io.jenkins.plugins.model.FeedStatus;
-import io.jenkins.plugins.util.Util;
 
 public class AddFeedStatus extends BuildStep {
     public String getFeed() {

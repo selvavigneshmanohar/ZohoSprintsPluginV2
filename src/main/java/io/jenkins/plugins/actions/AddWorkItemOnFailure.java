@@ -1,6 +1,6 @@
 package io.jenkins.plugins.actions;
 
-import static io.jenkins.plugins.util.Util.validateRequired;
+import static io.jenkins.plugins.Util.validateRequired;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -8,13 +8,11 @@ import java.util.Map;
 
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
-import org.kohsuke.stapler.StaplerRequest;
 
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
-import hudson.matrix.MatrixProject;
 import hudson.model.AbstractProject;
 import hudson.model.Run;
 import hudson.model.TaskListener;
@@ -23,7 +21,6 @@ import hudson.util.FormValidation;
 import io.jenkins.plugins.Messages;
 import io.jenkins.plugins.model.Item;
 import jenkins.tasks.SimpleBuildWrapper;
-import net.sf.json.JSONObject;
 
 public class AddWorkItemOnFailure extends SimpleBuildWrapper {
     private Item item;
@@ -124,7 +121,7 @@ public class AddWorkItemOnFailure extends SimpleBuildWrapper {
     public static class DescriptorImpl extends BuildWrapperDescriptor {
         @Override
         public boolean isApplicable(AbstractProject<?, ?> item) {
-            return !(item instanceof MatrixProject);
+            return true;
 
         }
 
@@ -139,13 +136,6 @@ public class AddWorkItemOnFailure extends SimpleBuildWrapper {
 
         public FormValidation doCheckName(@QueryParameter final String name) {
             return validateRequired(name);
-        }
-
-        @Override
-        public boolean configure(StaplerRequest req, JSONObject json) throws FormException {
-            req.bindJSON(this, json);
-            save();
-            return super.configure(req, json);
         }
 
         public FormValidation doCheckStatus(@QueryParameter final String status) {

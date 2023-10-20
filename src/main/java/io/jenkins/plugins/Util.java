@@ -1,14 +1,15 @@
-package io.jenkins.plugins.util;
+package io.jenkins.plugins;
 
 import java.util.Iterator;
 import java.util.List;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import hudson.util.FormValidation;
 import io.jenkins.plugins.configuration.ZSConnectionConfiguration;
 import io.jenkins.plugins.sprints.ZohoClient;
 import jenkins.model.Jenkins;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
 
 public class Util {
     private static final String GET_PROJECT_USER_API = "/projects/no-$1/user/details/";
@@ -17,21 +18,21 @@ public class Util {
             throws Exception {
         ZohoClient client = new ZohoClient(GET_PROJECT_USER_API, ZohoClient.METHOD_GET, projectNumber)
                 .addParameter("action", "projectusers")
-                .addParameter("emailids", JSONArray.fromObject(mailIds.split(",")));
+                .addParameter("emailids", new JSONArray(mailIds.split(",")));
         String response = client.execute();
 
-        JSONObject userObj = JSONObject.fromObject(response)
+        JSONObject userObj = new JSONObject(response)
                 .getJSONObject("userObj");
 
         Iterator<String> keys = userObj.keys();
-        Object[] users = new Object[userObj.size()];
+        Object[] users = new Object[userObj.length()];
         int counter = 0;
         while (keys.hasNext()) {
             String key = keys.next();
-            JSONObject value = JSONObject.fromObject(userObj.get(key));
+            JSONObject value = new JSONObject(userObj.get(key));
             users[counter++] = value.get("zsuserId");
         }
-        return JSONArray.fromObject(users);
+        return new JSONArray(users);
     }
 
     public static ZSConnectionConfiguration getZSConnection() {

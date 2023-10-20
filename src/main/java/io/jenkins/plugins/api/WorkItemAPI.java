@@ -1,11 +1,12 @@
 package io.jenkins.plugins.api;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import io.jenkins.plugins.Util;
 import io.jenkins.plugins.exception.ZSprintsException;
 import io.jenkins.plugins.model.Item;
 import io.jenkins.plugins.sprints.ZohoClient;
-import io.jenkins.plugins.util.Util;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
 
 public class WorkItemAPI {
     private static final String ADD_ITEM_COMMENT_API = "/projects/no-$1/sprints/no-$2/item/no-$3/notes/";
@@ -62,7 +63,7 @@ public class WorkItemAPI {
                 .addParameter("statusname", item.getStatus());
         Util.setCustomFields(item.getCustomFields(), client);
         String response = client.execute();
-        String message = JSONObject.fromObject(response).optString("message", null);
+        String message = new JSONObject(response).optString("message", null);
         if (message == null) {
             return successMessage;
         }

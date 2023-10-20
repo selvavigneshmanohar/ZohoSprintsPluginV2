@@ -1,11 +1,12 @@
 package io.jenkins.plugins.api;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import io.jenkins.plugins.Util;
 import io.jenkins.plugins.exception.ZSprintsException;
 import io.jenkins.plugins.model.Release;
 import io.jenkins.plugins.sprints.ZohoClient;
-import io.jenkins.plugins.util.Util;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
 
 public final class ReleaseAPI {
     private static final String CREATE_RELEASE_API = "/projects/no-$1/release/";
@@ -31,7 +32,7 @@ public final class ReleaseAPI {
                 .addParameter("ownerIds", ownerIds);
         Util.setCustomFields(release.getCustomFields(), client);
         String response = addOrUpdateRelease(release, client);
-        String message = JSONObject.fromObject(response).optString("message", null);
+        String message = new JSONObject(response).optString("message", null);
         if (message == null) {
             return "Release has been added";
         }
@@ -44,7 +45,7 @@ public final class ReleaseAPI {
                 .setJsonBodyresponse(true);
 
         String response = addOrUpdateRelease(release, client);
-        String message = JSONObject.fromObject(response).optString("i18nMessage", null);
+        String message = new JSONObject(response).optString("i18nMessage", null);
         if (message == null) {
             return "Release has been updated";
         }

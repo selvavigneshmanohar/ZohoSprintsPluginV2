@@ -10,7 +10,7 @@ import org.kohsuke.stapler.QueryParameter;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.util.FormValidation;
-import io.jenkins.plugins.util.Util;
+import io.jenkins.plugins.Util;
 
 public abstract class PipelineStepDescriptor extends StepDescriptor {
     @Override

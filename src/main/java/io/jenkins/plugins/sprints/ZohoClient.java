@@ -1,6 +1,6 @@
 package io.jenkins.plugins.sprints;
 
-import static io.jenkins.plugins.util.Util.getZSConnection;
+import static io.jenkins.plugins.Util.getZSConnection;
 
 import java.net.URLEncoder;
 import java.net.http.HttpResponse;
@@ -14,10 +14,11 @@ import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import io.jenkins.plugins.configuration.ZSConnectionConfiguration;
 import io.jenkins.plugins.exception.ZSprintsException;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
 
 public class ZohoClient {
     private static final Logger logger = Logger.getLogger(ZohoClient.class.getName());
@@ -81,6 +82,7 @@ public class ZohoClient {
 
     public String execute() throws Exception {
         logger.info(api);
+        prependDomain();
         checkAndSetOAuthToken();
         RequestClient client = getClient();
         HttpResponse<String> response = client.execute();
@@ -97,12 +99,12 @@ public class ZohoClient {
         if (isSuccessRequest()) {
             return responseString;
         }
-        throw new ZSprintsException(JSONObject.fromObject(responseString).toString());
+        throw new ZSprintsException(new JSONObject(responseString).toString());
     }
 
     private boolean isOAuthExpired(String response) {
         return statusCode == HttpServletResponse.SC_BAD_REQUEST &&
-                JSONObject.fromObject(response).optInt("code", 0) == 7601;
+                new JSONObject(response).optInt("code", 0) == 7601;
     }
 
     private void checkAndSetOAuthToken() throws Exception {
@@ -111,6 +113,10 @@ public class ZohoClient {
             generateNewAccessToken();
         }
         this.api = config.getZSApiPath() + api;
+    }
+
+    private void prependDomain() throws Exception {
+        this.api = getZSConnection().getZSApiPath() + api;
     }
 
     public synchronized void generateNewAccessToken() throws Exception {
@@ -128,7 +134,7 @@ public class ZohoClient {
                 .execute();
 
         if (response.statusCode() == HttpServletResponse.SC_OK) {
-            JSONObject respObj = JSONObject.fromObject(response.body());
+            JSONObject respObj = new JSONObject(response.body());
             if (respObj.has("access_token")) {
                 logger.info("New Access token created ");
                 accessToken = respObj.getString("access_token");

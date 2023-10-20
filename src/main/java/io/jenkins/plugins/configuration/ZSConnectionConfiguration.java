@@ -2,12 +2,11 @@ package io.jenkins.plugins.configuration;
 
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
-import org.kohsuke.stapler.StaplerRequest;
 
 import hudson.Extension;
 import hudson.util.Secret;
+import io.jenkins.plugins.model.ZSConnection;
 import jenkins.model.GlobalConfiguration;
-import net.sf.json.JSONObject;
 
 @Restricted(NoExternalUse.class)
 @Extension
@@ -28,11 +27,6 @@ public class ZSConnectionConfiguration extends GlobalConfiguration {
                 .withClientId(connection.getClientId())
                 .withClientSecret(connection.getClientSecret())
                 .withRefreshToken(connection.getRefreshToken());
-    }
-
-    @Override
-    public boolean configure(StaplerRequest req, JSONObject json) throws FormException {
-        return true;
     }
 
     private Secret getSecret(String value) {

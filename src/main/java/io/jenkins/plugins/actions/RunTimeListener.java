@@ -1,24 +1,18 @@
 package io.jenkins.plugins.actions;
 
 import java.io.IOException;
-import java.util.List;
-
-import org.apache.log4j.Logger;
 
 import hudson.EnvVars;
 import hudson.Extension;
-import hudson.matrix.MatrixRun;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.model.listeners.RunListener;
 import io.jenkins.plugins.api.WorkItemAPI;
 import io.jenkins.plugins.model.Item;
-import jenkins.model.Jenkins;
 
 @Extension
 public class RunTimeListener extends RunListener<Run<?, ?>> {
-    private static final Logger LOGGER = Logger.getLogger(RunTimeListener.class.getName());
 
     @Override
     public void onCompleted(final Run<?, ?> run, final TaskListener listener) {
@@ -30,19 +24,8 @@ public class RunTimeListener extends RunListener<Run<?, ?>> {
             return;
         }
 
-        List<AddWorkItemOnFailure> addWorkItemOnFailureList = Jenkins.get()
-                .getExtensionList(AddWorkItemOnFailure.class);
-        if (!addWorkItemOnFailureList.isEmpty()) {
-            Item item = addWorkItemOnFailureList.get(0).getForm();
-            LOGGER.info(item.getPrefix());
-            LOGGER.info(item.getName());
-            LOGGER.info(item.getType());
-            LOGGER.info(item.getStatus());
-            LOGGER.info(item.getPriority());
-        }
-
         Boolean isIssueCreateConfigured = envVars.containsKey("ZSPRINTS_ISSUE_BUILD_ENVIRONMENT_AVAILABLE");
-        if (isIssueCreateConfigured && Result.FAILURE.equals(run.getResult()) && !(run instanceof MatrixRun)) {
+        if (isIssueCreateConfigured && Result.FAILURE.equals(run.getResult())) {
             String prefix = envVars.get("ZSPRINTS_ISSUE_PREFIX");
             String name = envVars.get("ZSPRINTS_ISSUE_NAME");
             String description = envVars.get("ZSPRINTS_ISSUE_DESCRIPTION");

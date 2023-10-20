@@ -1,6 +1,4 @@
-package io.jenkins.plugins.configuration;
-
-import java.util.logging.Logger;
+package io.jenkins.plugins.api;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -11,12 +9,13 @@ import org.kohsuke.stapler.verb.POST;
 
 import hudson.Extension;
 import hudson.model.RootAction;
+import io.jenkins.plugins.configuration.ZSConnectionConfiguration;
+import io.jenkins.plugins.model.ZSConnection;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 
 @Extension
 public class ZSConnectionConfigAPI implements RootAction {
-    private static final Logger LOGGER = Logger.getLogger(ZSConnectionConfigAPI.class.getName());
 
     @Override
     public String getIconFileName() {

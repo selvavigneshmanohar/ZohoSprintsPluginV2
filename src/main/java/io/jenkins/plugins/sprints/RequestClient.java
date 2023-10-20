@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import net.sf.json.JSONObject;
+import org.json.JSONObject;
 
 public class RequestClient {
     private static final String CHARSET = StandardCharsets.UTF_8.name();
@@ -25,8 +25,7 @@ public class RequestClient {
     }
 
     public HttpResponse<String> execute() throws Exception {
-        HttpResponse<String> response = HttpClient.newBuilder().build().send(request, BodyHandlers.ofString());
-        return response;
+        return HttpClient.newBuilder().build().send(request, BodyHandlers.ofString());
     }
 
     public static class RequestClientBuilder {
@@ -90,7 +89,7 @@ public class RequestClient {
                     requestBuilder.setHeader("Content-type", "application/json");
                 }
                 requestBuilder
-                        .POST(isJSONBodyContent ? BodyPublishers.ofString(JSONObject.fromObject(queryParam).toString())
+                        .POST(isJSONBodyContent ? BodyPublishers.ofString(new JSONObject(queryParam).toString())
                                 : BodyPublishers.noBody());
             }
             header.entrySet().forEach(x -> requestBuilder.setHeader(x.getKey(), x.getValue()));
