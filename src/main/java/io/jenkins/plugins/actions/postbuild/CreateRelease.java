@@ -11,8 +11,8 @@ import io.jenkins.plugins.api.ReleaseAPI;
 public class CreateRelease extends ReleasePostBuilder {
 
     @DataBoundConstructor
-    public CreateRelease(String prefix, String name, String owners, String goal, String stage, String startdate,
-            String enddate, String customFields) {
+    public CreateRelease(String prefix, String name, String goal, String stage, String owners,
+            String startdate, String enddate, String customFields) {
         super(prefix, name, owners, goal, stage, startdate, enddate, customFields);
     }
 

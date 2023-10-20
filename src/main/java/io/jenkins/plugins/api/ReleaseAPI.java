@@ -2,7 +2,6 @@ package io.jenkins.plugins.api;
 
 import io.jenkins.plugins.exception.ZSprintsException;
 import io.jenkins.plugins.model.Release;
-import io.jenkins.plugins.sprints.RequestClient;
 import io.jenkins.plugins.sprints.ZohoClient;
 import io.jenkins.plugins.util.Util;
 import net.sf.json.JSONArray;
@@ -27,12 +26,12 @@ public final class ReleaseAPI {
         if (assignee != null && !assignee.trim().isEmpty()) {
             ownerIds = Util.getZSUserIds(release.getProjectNumber(), assignee);
         }
-        ZohoClient client = new ZohoClient(CREATE_RELEASE_API, RequestClient.METHOD_POST, release.getProjectNumber())
+        ZohoClient client = new ZohoClient(CREATE_RELEASE_API, ZohoClient.METHOD_POST, release.getProjectNumber())
                 .setJsonBodyresponse(true)
-                .addParameter("ownerIds", (ownerIds != null && !ownerIds.isEmpty()) ? ownerIds : null);
+                .addParameter("ownerIds", ownerIds);
         Util.setCustomFields(release.getCustomFields(), client);
         String response = addOrUpdateRelease(release, client);
-        String message = JSONObject.fromObject(response).optString("i18nMessage", null);
+        String message = JSONObject.fromObject(response).optString("message", null);
         if (message == null) {
             return "Release has been added";
         }
@@ -40,7 +39,7 @@ public final class ReleaseAPI {
     }
 
     public String update(Release release) throws Exception {
-        ZohoClient client = new ZohoClient(UPDATE_RELEASE_API, RequestClient.METHOD_POST, release.getProjectNumber(),
+        ZohoClient client = new ZohoClient(UPDATE_RELEASE_API, ZohoClient.METHOD_POST, release.getProjectNumber(),
                 release.getReleaseNumber())
                 .setJsonBodyresponse(true);
 
@@ -65,7 +64,7 @@ public final class ReleaseAPI {
 
     public String addComment(Release release) throws Exception {
 
-        new ZohoClient(ADD_COMMENT_API, RequestClient.METHOD_POST, release.getProjectNumber(),
+        new ZohoClient(ADD_COMMENT_API, ZohoClient.METHOD_POST, release.getProjectNumber(),
                 release.getReleaseNumber())
                 .addParameter("name", release.getNote())
                 .execute();

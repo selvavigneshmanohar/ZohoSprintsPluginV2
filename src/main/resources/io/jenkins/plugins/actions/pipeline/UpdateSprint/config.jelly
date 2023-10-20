@@ -9,12 +9,6 @@
         <f:entry title="Description" field="description">
           <f:textarea />
         </f:entry>
-        <f:entry title="Scrum Master" field="scrummaster">
-        <f:textbox/>
-        </f:entry>
-        <f:entry title="Sprint Users" field="users">
-            <f:textbox/>
-        </f:entry>
         <f:entry title="Duration" field="duration">
           <f:textbox />
         </f:entry>
@@ -24,4 +18,17 @@
         <f:entry title="End Date" field="enddate">
           <f:textbox />
         </f:entry>
+        <j:if test="${buildJob.isDuration() == true}">
+            <f:entry title="Duration" field="duration">
+            <f:textbox />
+            </f:entry>
+        </j:if>
+         <j:if test="${buildJob.isDuration() == false}">
+            <f:entry title="Start Date" field="startdate">
+            <f:textbox />
+            </f:entry>
+            <f:entry title="End Date" field="enddate">
+            <f:textbox />
+            </f:entry>
+         </j:if>
 </j:jelly>

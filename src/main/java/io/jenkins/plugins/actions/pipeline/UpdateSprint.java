@@ -10,19 +10,15 @@ import hudson.Extension;
 import io.jenkins.plugins.Messages;
 import io.jenkins.plugins.actions.pipeline.descriptor.PipelineStepDescriptor;
 import io.jenkins.plugins.actions.pipeline.executor.PipelineStepExecutor;
-import io.jenkins.plugins.actions.pipeline.step.ReleasePipelineStep;
-import io.jenkins.plugins.api.ReleaseAPI;
+import io.jenkins.plugins.actions.pipeline.step.SprintsPipelineStep;
+import io.jenkins.plugins.api.SprintAPI;
 import io.jenkins.plugins.exception.ZSprintsException;
-import io.jenkins.plugins.model.BaseModel;
-import io.jenkins.plugins.model.Release;
 
-public class CreateRelease extends ReleasePipelineStep {
-
+public class UpdateSprint extends SprintsPipelineStep {
     @DataBoundConstructor
-    public CreateRelease(String prefix, String name, String goal, String stage, String owners,
-            String startdate,
-            String enddate, String customFields) {
-        super(prefix, name, owners, goal, stage, startdate, enddate, customFields);
+    public UpdateSprint(String prefix, String name, String description, String duration, String startdate,
+            String enddate) {
+        super(prefix, name, description, null, null, duration, startdate, enddate);
     }
 
     @Override
@@ -30,7 +26,7 @@ public class CreateRelease extends ReleasePipelineStep {
         setEnvironmentVariableReplacer(context);
         Function<String, String> executor = (key) -> {
             try {
-                return ReleaseAPI.getInstance().create(getForm());
+                return SprintAPI.getInstance().update(getForm());
             } catch (Exception e) {
                 throw new ZSprintsException(e.getMessage());
             }
@@ -39,28 +35,17 @@ public class CreateRelease extends ReleasePipelineStep {
         return new PipelineStepExecutor(executor, context);
     }
 
-    @Extension(optional = true)
+    @Extension
     public static final class DescriptorImpl extends PipelineStepDescriptor {
         @Override
         public String getFunctionName() {
-            return "sprintsCreateRelease";
+            return "updateSprints";
         }
 
         @Override
         public String getDisplayName() {
-            return Messages.release_create();
+            return Messages.sprint_update();
         }
     }
 
-    public static class CreateReleaseExecutor extends PipelineStepExecutor {
-
-        protected CreateReleaseExecutor(BaseModel form, StepContext context) {
-            super(form, context);
-        }
-
-        protected String execute() throws Exception {
-            return ReleaseAPI.getInstance().create((Release) getForm());
-        }
-
-    }
 }

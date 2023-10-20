@@ -5,24 +5,24 @@ import java.util.function.Function;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.QueryParameter;
 
 import hudson.Extension;
+import hudson.util.FormValidation;
 import io.jenkins.plugins.Messages;
 import io.jenkins.plugins.actions.pipeline.descriptor.PipelineStepDescriptor;
 import io.jenkins.plugins.actions.pipeline.executor.PipelineStepExecutor;
-import io.jenkins.plugins.actions.pipeline.step.ReleasePipelineStep;
-import io.jenkins.plugins.api.ReleaseAPI;
+import io.jenkins.plugins.actions.pipeline.step.SprintsPipelineStep;
+import io.jenkins.plugins.api.SprintAPI;
 import io.jenkins.plugins.exception.ZSprintsException;
-import io.jenkins.plugins.model.BaseModel;
-import io.jenkins.plugins.model.Release;
+import io.jenkins.plugins.util.Util;
 
-public class CreateRelease extends ReleasePipelineStep {
+public class CreateSprint extends SprintsPipelineStep {
 
     @DataBoundConstructor
-    public CreateRelease(String prefix, String name, String goal, String stage, String owners,
-            String startdate,
-            String enddate, String customFields) {
-        super(prefix, name, owners, goal, stage, startdate, enddate, customFields);
+    public CreateSprint(String prefix, String name, String description, String scrummaster, String users,
+            String duration, String startdate, String enddate) {
+        super(prefix, name, description, scrummaster, users, duration, startdate, enddate);
     }
 
     @Override
@@ -30,7 +30,7 @@ public class CreateRelease extends ReleasePipelineStep {
         setEnvironmentVariableReplacer(context);
         Function<String, String> executor = (key) -> {
             try {
-                return ReleaseAPI.getInstance().create(getForm());
+                return SprintAPI.getInstance().create(getForm());
             } catch (Exception e) {
                 throw new ZSprintsException(e.getMessage());
             }
@@ -39,28 +39,21 @@ public class CreateRelease extends ReleasePipelineStep {
         return new PipelineStepExecutor(executor, context);
     }
 
-    @Extension(optional = true)
+    @Extension
     public static final class DescriptorImpl extends PipelineStepDescriptor {
         @Override
         public String getFunctionName() {
-            return "sprintsCreateRelease";
+            return "createSprints";
         }
 
         @Override
         public String getDisplayName() {
-            return Messages.release_create();
+            return Messages.sprint_create();
+        }
+
+        public FormValidation doCheckName(@QueryParameter final String name) {
+            return Util.validateRequired(name);
         }
     }
 
-    public static class CreateReleaseExecutor extends PipelineStepExecutor {
-
-        protected CreateReleaseExecutor(BaseModel form, StepContext context) {
-            super(form, context);
-        }
-
-        protected String execute() throws Exception {
-            return ReleaseAPI.getInstance().create((Release) getForm());
-        }
-
-    }
 }

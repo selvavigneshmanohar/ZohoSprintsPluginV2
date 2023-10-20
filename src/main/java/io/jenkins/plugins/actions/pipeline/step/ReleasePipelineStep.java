@@ -4,7 +4,7 @@ import io.jenkins.plugins.model.Release;
 
 public abstract class ReleasePipelineStep extends PipelineStep {
 
-    public ReleasePipelineStep(String prefix, String name, String owners, String goal, String stage, String startdate,
+    public ReleasePipelineStep(String prefix, String name, String goal, String stage, String owners, String startdate,
             String enddate, String customFields) {
         super(Release.getInstance(prefix).setName(name)
                 .setOwners(owners)

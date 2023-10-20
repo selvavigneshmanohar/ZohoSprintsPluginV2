@@ -2,7 +2,6 @@ package io.jenkins.plugins.api;
 
 import io.jenkins.plugins.exception.ZSprintsException;
 import io.jenkins.plugins.model.Item;
-import io.jenkins.plugins.sprints.RequestClient;
 import io.jenkins.plugins.sprints.ZohoClient;
 import io.jenkins.plugins.util.Util;
 import net.sf.json.JSONArray;
@@ -22,7 +21,7 @@ public class WorkItemAPI {
     }
 
     public String addComment(Item item) throws Exception {
-        new ZohoClient(ADD_ITEM_COMMENT_API, RequestClient.METHOD_POST,
+        new ZohoClient(ADD_ITEM_COMMENT_API, ZohoClient.METHOD_POST,
                 item.getProjectNumber(),
                 item.getSprintNumber(),
                 item.getItemNumber())
@@ -37,7 +36,7 @@ public class WorkItemAPI {
         if (assignee != null && !assignee.trim().isEmpty()) {
             assigneeIds = Util.getZSUserIds(item.getProjectNumber(), assignee);
         }
-        ZohoClient client = new ZohoClient(ADD_ITEM_API, RequestClient.METHOD_POST, item.getProjectNumber(),
+        ZohoClient client = new ZohoClient(ADD_ITEM_API, ZohoClient.METHOD_POST, item.getProjectNumber(),
                 item.getSprintNumber())
                 .addParameter("action", "additem")
                 .addParameter("assignee", assigneeIds);
@@ -45,7 +44,7 @@ public class WorkItemAPI {
     }
 
     public String updateItem(Item item) throws Exception {
-        ZohoClient client = new ZohoClient(UPDATE_ITEM_API, RequestClient.METHOD_POST, item.getProjectNumber(),
+        ZohoClient client = new ZohoClient(UPDATE_ITEM_API, ZohoClient.METHOD_POST, item.getProjectNumber(),
                 item.getSprintNumber(),
                 item.getItemNumber())
                 .addParameter("action", "updateitem");

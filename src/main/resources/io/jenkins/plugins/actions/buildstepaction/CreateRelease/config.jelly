@@ -12,7 +12,7 @@
         <f:entry title="Stage" field="stage">
             <f:textbox />
         </f:entry>
-        <f:entry title="Owners" field="owner">
+        <f:entry title="Owners" field="owners">
             <f:textbox />
         </f:entry>
         <f:entry title="Start Date" field="startdate">

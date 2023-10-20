@@ -12,7 +12,7 @@ public class UpdateSprint extends SprintsPostBuilder {
     @DataBoundConstructor
     public UpdateSprint(String prefix, String name, String description, String duration, String startdate,
             String enddate) {
-        super(prefix, name, description, duration, startdate, enddate);
+        super(prefix, name, description, null, null, duration, startdate, enddate);
     }
 
     @Override

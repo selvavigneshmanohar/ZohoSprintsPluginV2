@@ -1,6 +1,6 @@
 package io.jenkins.plugins.actions;
 
-import static io.jenkins.plugins.util.Util.isEmpty;
+import static io.jenkins.plugins.util.Util.validateRequired;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -16,110 +16,103 @@ import hudson.FilePath;
 import hudson.Launcher;
 import hudson.matrix.MatrixProject;
 import hudson.model.AbstractProject;
-import hudson.model.BuildListener;
-import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.tasks.BuildWrapperDescriptor;
 import hudson.util.FormValidation;
 import io.jenkins.plugins.Messages;
-import io.jenkins.plugins.util.Util;
+import io.jenkins.plugins.model.Item;
 import jenkins.tasks.SimpleBuildWrapper;
 import net.sf.json.JSONObject;
 
 public class AddWorkItemOnFailure extends SimpleBuildWrapper {
-    private String prefix, name, description, status, type, priority, duration, startdate, enddate, customFields;
+    private Item item;
 
     @DataBoundConstructor
     public AddWorkItemOnFailure(String prefix, String name, String description, String status, String type,
             String priority,
-            String duration, String startdate, String enddate, String customFields) {
-        this.prefix = prefix;
-        this.name = name;
-        this.description = description;
-        this.status = status;
-        this.type = type;
-        this.priority = priority;
-        this.duration = duration;
-        this.startdate = startdate;
-        this.enddate = enddate;
-        this.customFields = customFields;
+            String duration, String assignee, String startdate, String enddate, String customFields) {
+        item = Item.getInstance(prefix).setName(name)
+                .setDescription(description)
+                .setStatus(status)
+                .setType(type)
+                .setPriority(priority)
+                .setDuration(duration)
+                .setAssignee(assignee)
+                .setStartdate(startdate)
+                .setEnddate(enddate)
+                .setCustomFields(customFields);
+    }
+
+    public Item getForm() {
+        return this.item;
     }
 
     public String getPrefix() {
-        return prefix;
+        return item.getPrefix();
+    }
+
+    public String getAssignee() {
+        return item.getAssignee();
     }
 
     public String getName() {
-        return name;
+        return item.getName();
     }
 
     public String getDescription() {
-        return description;
+        return item.getDescription();
     }
 
     public String getStatus() {
-        return status;
+        return item.getStatus();
     }
 
     public String getType() {
-        return type;
+        return item.getType();
     }
 
     public String getPriority() {
-        return priority;
+        return item.getPriority();
     }
 
     public String getDuration() {
-        return duration;
+        return item.getDuration();
     }
 
     public String getStartdate() {
-        return startdate;
+        return item.getStartdate();
     }
 
     public String getEnddate() {
-        return enddate;
+        return item.getEnddate();
     }
 
     public String getCustomFields() {
-        return customFields;
+        return item.getCustomFields();
     }
 
-    private String replaceEnvVaribaleToValue(Run<?, ?> run, final TaskListener listener,
-            final String key) throws IOException, InterruptedException {
-        return run.getEnvironment(listener).expand(key);
+    public String getNote() {
+        return item.getNote();
     }
 
     @Override
     public void setUp(Context context, Run<?, ?> build, FilePath workspace, Launcher launcher,
             TaskListener listener, EnvVars initialEnvironment) throws IOException, InterruptedException {
-        String itemPrefix, itemName;
-        final Map<String, String> envMap = new HashMap<>();
-        itemPrefix = replaceEnvVaribaleToValue(build, listener, prefix);
-        itemName = replaceEnvVaribaleToValue(build, listener, name);
-        envMap.put("SPRINTS_ISSUE_NAME", itemName);
-        envMap.put("SPRINTS_ISSUE_DESCRIPTION", replaceEnvVaribaleToValue(build, listener, description));
-        envMap.put("SPRINTS_ISSUE_PREFIX", itemPrefix);
-        envMap.put("SPRINTS_ISSUE_ASSIGNEE", replaceEnvVaribaleToValue(build, listener, name));
-        envMap.put("SPRINTS_ISSUE_TYPE", replaceEnvVaribaleToValue(build, listener, type));
-        envMap.put("SPRINTS_ISSUE_STATUS", replaceEnvVaribaleToValue(build, listener, status));
-        envMap.put("SPRINTS_ISSUE_DURATION", replaceEnvVaribaleToValue(build, listener, duration));
-        envMap.put("SPRINTS_ISSUE_PRIORITY", replaceEnvVaribaleToValue(build, listener, priority));
-        envMap.put("SPRINTS_ISSUE_STARTDATE", replaceEnvVaribaleToValue(build, listener, startdate));
-        envMap.put("SPRINTS_ISSUE_ENDDATE", replaceEnvVaribaleToValue(build, listener, enddate));
-        envMap.put("SPRINTS_ISSUE_CUSTOMFIELD", replaceEnvVaribaleToValue(build, listener, customFields));
-        envMap.put("SPRINTS_ISSUE_BUILD_ENVIRONMENT_AVAILABLE", Boolean.toString(true));
-        if (isEmpty(itemPrefix)) {
-            listener.error("Prefix should not be empty or null");
-            ((BuildListener) listener).finished(Result.FAILURE);
-        }
-        if (isEmpty(itemName)) {
-            listener.error("Item name is not specified");
-            ((BuildListener) listener).finished(Result.FAILURE);
-        }
-
-        context.getEnv().putAll(envMap);
+        final Map<String, String> issueParamMap = new HashMap<>();
+        issueParamMap.put("ZSPRINTS_ISSUE_NAME", getName());
+        issueParamMap.put("ZSPRINTS_ISSUE_PREFIX", getPrefix());
+        issueParamMap.put("ZSPRINTS_ISSUE_DESCRIPTION", getDescription());
+        issueParamMap.put("ZSPRINTS_ISSUE_ASSIGNEE", getAssignee());
+        issueParamMap.put("ZSPRINTS_ISSUE_TYPE", getType());
+        issueParamMap.put("ZSPRINTS_ISSUE_STATUS", getStatus());
+        issueParamMap.put("ZSPRINTS_ISSUE_DURATION", getDuration());
+        issueParamMap.put("ZSPRINTS_ISSUE_PRIORITY", getPriority());
+        issueParamMap.put("ZSPRINTS_ISSUE_STARTDATE", getStartdate());
+        issueParamMap.put("ZSPRINTS_ISSUE_ENDDATE", getEnddate());
+        issueParamMap.put("ZSPRINTS_ISSUE_CUSTOMFIELD", getCustomFields());
+        issueParamMap.put("ZSPRINTS_ISSUE_BUILD_ENVIRONMENT_AVAILABLE", Boolean.toString(true));
+        context.getEnv().putAll(issueParamMap);
     }
 
     @Override
@@ -141,11 +134,11 @@ public class AddWorkItemOnFailure extends SimpleBuildWrapper {
         }
 
         public FormValidation doCheckPrefix(@QueryParameter final String prefix) {
-            return Util.validateRequired(prefix);
+            return validateRequired(prefix);
         }
 
         public FormValidation doCheckName(@QueryParameter final String name) {
-            return Util.validateRequired(name);
+            return validateRequired(name);
         }
 
         @Override
@@ -156,24 +149,15 @@ public class AddWorkItemOnFailure extends SimpleBuildWrapper {
         }
 
         public FormValidation doCheckStatus(@QueryParameter final String status) {
-            if (!isEmpty(status)) {
-                return FormValidation.ok();
-            }
-            return Util.validateRequired(status);
+            return validateRequired(status);
         }
 
         public FormValidation doCheckType(@QueryParameter final String type) {
-            if (!isEmpty(type)) {
-                return FormValidation.ok();
-            }
-            return Util.validateRequired(type);
+            return validateRequired(type);
         }
 
         public FormValidation doCheckPriority(@QueryParameter final String priority) {
-            if (!isEmpty(priority)) {
-                return FormValidation.ok();
-            }
-            return Util.validateRequired(priority);
+            return validateRequired(priority);
         }
     }
 }

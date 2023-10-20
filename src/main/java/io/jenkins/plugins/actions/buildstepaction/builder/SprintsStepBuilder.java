@@ -3,12 +3,14 @@ package io.jenkins.plugins.actions.buildstepaction.builder;
 import io.jenkins.plugins.model.Sprint;
 
 public abstract class SprintsStepBuilder extends BuildStep {
-    public SprintsStepBuilder(String prefix, String name, String description, String duration, String startdate,
-            String enddate) {
+    public SprintsStepBuilder(String prefix, String name, String description, String scrummaster, String users,
+            String duration, String startdate, String enddate) {
         super(Sprint.getInstance(prefix).setName(name)
                 .setDuration(duration)
                 .setStartdate(startdate)
-                .setEnddate(enddate));
+                .setEnddate(enddate)
+                .setScrummaster(scrummaster)
+                .setUsers(users));
     }
 
     public SprintsStepBuilder(String prefix, String note) {
@@ -41,5 +43,13 @@ public abstract class SprintsStepBuilder extends BuildStep {
 
     public String getDescription() {
         return getForm().getDescription();
+    }
+
+    public String getUsers() {
+        return getForm().getUsers();
+    }
+
+    public String getScrummaster() {
+        return getForm().getScrummaster();
     }
 }

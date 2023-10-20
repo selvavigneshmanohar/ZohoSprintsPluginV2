@@ -5,7 +5,6 @@ import java.util.List;
 
 import hudson.util.FormValidation;
 import io.jenkins.plugins.configuration.ZSConnectionConfiguration;
-import io.jenkins.plugins.sprints.RequestClient;
 import io.jenkins.plugins.sprints.ZohoClient;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONArray;
@@ -16,7 +15,7 @@ public class Util {
 
     public static JSONArray getZSUserIds(String projectNumber, String mailIds)
             throws Exception {
-        ZohoClient client = new ZohoClient(GET_PROJECT_USER_API, RequestClient.METHOD_GET, projectNumber)
+        ZohoClient client = new ZohoClient(GET_PROJECT_USER_API, ZohoClient.METHOD_GET, projectNumber)
                 .addParameter("action", "projectusers")
                 .addParameter("emailids", JSONArray.fromObject(mailIds.split(",")));
         String response = client.execute();

@@ -45,6 +45,7 @@ public abstract class PostBuild extends Recorder implements MatrixAggregatable {
             });
             String message = perform();
             listener.getLogger().println("[Zoho Sprints] " + message);
+            form.setEnviroinmentVaribaleReplacer(null);
             return true;
         } catch (Exception e) {
             listener.error(e.getMessage());

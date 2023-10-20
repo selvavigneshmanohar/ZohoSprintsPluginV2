@@ -1,26 +1,34 @@
 package io.jenkins.plugins.sprints;
 
+import static io.jenkins.plugins.util.Util.getZSConnection;
+
+import java.net.URLEncoder;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletResponse;
 
 import io.jenkins.plugins.configuration.ZSConnectionConfiguration;
 import io.jenkins.plugins.exception.ZSprintsException;
-import io.jenkins.plugins.util.Util;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 public class ZohoClient {
     private static final Logger logger = Logger.getLogger(ZohoClient.class.getName());
-    private int responsecode;
+    private static final Pattern RELATIVE_URL_PATTERN = Pattern.compile("\\$(\\d{1,2})");
+    public static final String METHOD_GET = "get";
+    public static final String METHOD_POST = "post";
+    private int statusCode;
     private Map<String, Object> queryParam = new HashMap<>();
     private Map<String, String> header = new HashMap<>();
     private String api;
     private String method;
-    private String[] relativeUrlParams;
     private boolean isJsonBodyresponse = false;
 
     private ZohoClient() {
@@ -30,14 +38,19 @@ public class ZohoClient {
         return new ZohoClient();
     }
 
-    public ZohoClient(String api, String method, String... relativeUrlParams) {
-        this.api = api;
+    public ZohoClient(String api, String method, String... relativeUrlParams) throws Exception {
+        this.api = constructUri(api, relativeUrlParams);
         this.method = method;
-        this.relativeUrlParams = relativeUrlParams;
+        setDefaultHeader();
+    }
+
+    public void setDefaultHeader() {
+        header.put("X-ZA-SOURCE", "eiULZMmzMCRXCgFljRnxrA==");
+        header.put("Authorization", "Zoho-oauthtoken " + getZSConnection().getAccessToken());
     }
 
     public ZohoClient addParameter(String key, String value) {
-        if (value != null && !value.trim().isEmpty()) {
+        if (key != null && value != null && !value.trim().isEmpty()) {
             queryParam.put(key, value);
         }
         return this;
@@ -56,61 +69,66 @@ public class ZohoClient {
     }
 
     public boolean isSuccessRequest() {
-        return responsecode == HttpServletResponse.SC_OK || responsecode == HttpServletResponse.SC_CREATED;
+        return statusCode == HttpServletResponse.SC_OK || statusCode == HttpServletResponse.SC_CREATED;
+    }
+
+    private RequestClient getClient() throws Exception {
+        return new RequestClient.RequestClientBuilder(api, method, queryParam)
+                .setHeader(header)
+                .setJsonBodyContent(isJsonBodyresponse)
+                .build();
     }
 
     public String execute() throws Exception {
-        logger.info(queryParam.toString());
-        isOAuthTokenAvailable();
-        @SuppressWarnings("DLS_DEAD_LOCAL_STORE")
-        RequestClient client = new RequestClient(api, method, relativeUrlParams)
-                .setJSONBodyContent(isJsonBodyresponse)
-                .setQueryParam(queryParam);
-        client.setHeader(header);
-        String response = client.execute();
-        if (isOAuthExpired(client, response)) {
+        logger.info(api);
+        checkAndSetOAuthToken();
+        RequestClient client = getClient();
+        HttpResponse<String> response = client.execute();
+        String responseString = response.body();
+        logger.info(responseString);
+        statusCode = response.statusCode();
+        if (isOAuthExpired(responseString)) {
             generateNewAccessToken();
-            response = client.execute();
+            response = getClient().execute();
+            responseString = response.body();
+            statusCode = response.statusCode();
         }
-        responsecode = client.getResponsecode();
+        logger.info(responseString);
         if (isSuccessRequest()) {
-            return response;
+            return responseString;
         }
-        throw new ZSprintsException(JSONObject.fromObject(response).toString());
-
+        throw new ZSprintsException(JSONObject.fromObject(responseString).toString());
     }
 
-    private boolean isOAuthExpired(RequestClient client, String response) {
-        return client.getResponsecode() == HttpServletResponse.SC_BAD_REQUEST &&
+    private boolean isOAuthExpired(String response) {
+        return statusCode == HttpServletResponse.SC_BAD_REQUEST &&
                 JSONObject.fromObject(response).optInt("code", 0) == 7601;
     }
 
-    private void isOAuthTokenAvailable() throws Exception {
-        ZSConnectionConfiguration config = Util.getZSConnection();
+    private void checkAndSetOAuthToken() throws Exception {
+        ZSConnectionConfiguration config = getZSConnection();
         if (config.getAccessToken() != null && config.getAccessToken().length() == 0) {
             generateNewAccessToken();
         }
         this.api = config.getZSApiPath() + api;
-        header.put("X-ZA-SOURCE", "eiULZMmzMCRXCgFljRnxrA==");
-        header.computeIfAbsent("Authorization", k -> {
-            return "Zoho-oauthtoken " + config.getAccessToken();
-        });
     }
 
     public synchronized void generateNewAccessToken() throws Exception {
-        ZSConnectionConfiguration config = Util.getZSConnection();
+        ZSConnectionConfiguration config = getZSConnection();
         logger.info("New Token method called");
         String accessToken = null;
-        RequestClient requestClient = new RequestClient(config.getAccountsDomain() + "/oauth/v2/token",
-                RequestClient.METHOD_POST, null)
-                .addParameter("grant_type", "refresh_token")
-                .addParameter("client_id", config.getClientId())
-                .addParameter("client_secret", config.getClientSecret())
-                .addParameter("refresh_token", config.getRefreshToken())
-                .addParameter("redirect_uri", config.getRedirectURL());
-        String resp = requestClient.execute();
-        if (resp != null && resp.startsWith("{")) {
-            JSONObject respObj = JSONObject.fromObject(resp);
+        HttpResponse<String> response = new RequestClient.RequestClientBuilder(
+                config.getAccountsDomain() + "/oauth/v2/token", METHOD_POST)
+                .setParameter("grant_type", "refresh_token")
+                .setParameter("client_id", config.getClientId())
+                .setParameter("client_secret", config.getClientSecret())
+                .setParameter("refresh_token", config.getRefreshToken())
+                .setParameter("redirect_uri", config.getRedirectURL())
+                .build()
+                .execute();
+
+        if (response.statusCode() == HttpServletResponse.SC_OK) {
+            JSONObject respObj = JSONObject.fromObject(response.body());
             if (respObj.has("access_token")) {
                 logger.info("New Access token created ");
                 accessToken = respObj.getString("access_token");
@@ -119,8 +137,23 @@ public class ZohoClient {
                 header.put("Authorization", "Zoho-oauthtoken " + accessToken);
                 logger.info("New Token generated");
             } else {
-                logger.log(Level.INFO, "Error occurred during new access token creation Error - {0}", resp);
+                logger.log(Level.INFO, "Error occurred during new access token creation Error - {0}", response.body());
             }
         }
+    }
+
+    private String constructUri(String url, String urlParams[]) throws Exception {
+        if (urlParams == null) {
+            return url;
+        }
+        StringBuffer urlBuilder = new StringBuffer();
+        Matcher matcher = RELATIVE_URL_PATTERN.matcher(url);
+        while (matcher.find()) {
+            matcher.appendReplacement(urlBuilder,
+                    URLEncoder.encode(urlParams[Integer.parseInt(matcher.group(1)) - 1],
+                            StandardCharsets.UTF_8.name()));
+        }
+        matcher.appendTail(urlBuilder);
+        return urlBuilder.toString();
     }
 }

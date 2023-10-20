@@ -3,20 +3,22 @@ package io.jenkins.plugins.actions.pipeline.step;
 import io.jenkins.plugins.model.Sprint;
 
 public abstract class SprintsPipelineStep extends PipelineStep {
-    public SprintsPipelineStep(String prefix) {
-        super(Sprint.getInstance(prefix));
-    }
-
-    public SprintsPipelineStep(String prefix, String name, String description, String duration, String startdate,
-            String enddate) {
+    public SprintsPipelineStep(String prefix, String name, String description, String scrummaster, String users,
+            String duration, String startdate, String enddate) {
         super(Sprint.getInstance(prefix).setName(name)
                 .setDuration(duration)
                 .setStartdate(startdate)
-                .setEnddate(enddate));
+                .setEnddate(enddate)
+                .setScrummaster(scrummaster)
+                .setUsers(users));
     }
 
     public SprintsPipelineStep(String prefix, String note) {
         super(Sprint.getInstance(prefix).setNote(note));
+    }
+
+    public SprintsPipelineStep(String prefix) {
+        super(Sprint.getInstance(prefix));
     }
 
     public Sprint getForm() {
@@ -45,5 +47,13 @@ public abstract class SprintsPipelineStep extends PipelineStep {
 
     public String getDescription() {
         return getForm().getDescription();
+    }
+
+    public String getUsers() {
+        return getForm().getUsers();
+    }
+
+    public String getScrummaster() {
+        return getForm().getScrummaster();
     }
 }

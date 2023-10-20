@@ -1,7 +1,16 @@
 package io.jenkins.plugins.model;
 
 public class Sprint extends BaseModel {
-    private String name, description, startdate, enddate, duration, users, note;
+    private String name, description, startdate, enddate, duration, users, note, scrummaster;
+
+    public String getScrummaster() {
+        return scrummaster;
+    }
+
+    public Sprint setScrummaster(String scrummaster) {
+        this.scrummaster = scrummaster;
+        return this;
+    }
 
     public String getDurationType() {
         return getValue(description);
