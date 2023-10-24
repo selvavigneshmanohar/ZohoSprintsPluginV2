@@ -20,8 +20,20 @@ public abstract class PostBuild extends Recorder {
         return form;
     }
 
-    public String getPrefix() {
-        return form.getPrefix();
+    public String getProjectNumber() {
+        return form.getProjectNumber();
+    }
+
+    public String getItemNumber() {
+        return form.getItemNumber();
+    }
+
+    public String getSprintNumber() {
+        return form.getSprintNumber();
+    }
+
+    public String getReleaseNumber() {
+        return form.getReleaseNumber();
     }
 
     public PostBuild(BaseModel form) {

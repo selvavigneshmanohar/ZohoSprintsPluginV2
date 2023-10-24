@@ -19,6 +19,7 @@ import hudson.model.TaskListener;
 import hudson.tasks.BuildWrapperDescriptor;
 import hudson.util.FormValidation;
 import io.jenkins.plugins.Messages;
+import io.jenkins.plugins.Util;
 import io.jenkins.plugins.model.Item;
 import jenkins.tasks.SimpleBuildWrapper;
 
@@ -26,10 +27,12 @@ public class AddWorkItemOnFailure extends SimpleBuildWrapper {
     private Item item;
 
     @DataBoundConstructor
-    public AddWorkItemOnFailure(String prefix, String name, String description, String status, String type,
+    public AddWorkItemOnFailure(String projectNumber, String sprintNumber, String name, String description,
+            String status, String type,
             String priority,
             String duration, String assignee, String startdate, String enddate, String customFields) {
-        item = Item.getInstance(prefix).setName(name)
+        item = Item.getInstance(projectNumber, sprintNumber)
+                .setName(name)
                 .setDescription(description)
                 .setStatus(status)
                 .setType(type)
@@ -45,8 +48,12 @@ public class AddWorkItemOnFailure extends SimpleBuildWrapper {
         return this.item;
     }
 
-    public String getPrefix() {
-        return item.getPrefix();
+    public String getProjectNumber() {
+        return item.getProjectNumber();
+    }
+
+    public String getSprintNumber() {
+        return item.getSprintNumber();
     }
 
     public String getAssignee() {
@@ -98,7 +105,8 @@ public class AddWorkItemOnFailure extends SimpleBuildWrapper {
             TaskListener listener, EnvVars initialEnvironment) throws IOException, InterruptedException {
         final Map<String, String> issueParamMap = new HashMap<>();
         issueParamMap.put("ZSPRINTS_ISSUE_NAME", getName());
-        issueParamMap.put("ZSPRINTS_ISSUE_PREFIX", getPrefix());
+        issueParamMap.put("ZSPRINTS_ISSUE_PROJECT_NUMBER", getProjectNumber());
+        issueParamMap.put("ZSPRINTS_ISSUE_SPRINT_NUMBER", getSprintNumber());
         issueParamMap.put("ZSPRINTS_ISSUE_DESCRIPTION", getDescription());
         issueParamMap.put("ZSPRINTS_ISSUE_ASSIGNEE", getAssignee());
         issueParamMap.put("ZSPRINTS_ISSUE_TYPE", getType());
@@ -130,8 +138,12 @@ public class AddWorkItemOnFailure extends SimpleBuildWrapper {
             return Messages.issue_in_failure();
         }
 
-        public FormValidation doCheckPrefix(@QueryParameter final String prefix) {
-            return validateRequired(prefix);
+        public FormValidation doCheckProjectNumber(@QueryParameter final String projectNumber) {
+            return Util.validateRequired(projectNumber);
+        }
+
+        public FormValidation doCheckSprintNumber(@QueryParameter final String sprintNumber) {
+            return Util.validateRequired(sprintNumber);
         }
 
         public FormValidation doCheckName(@QueryParameter final String name) {

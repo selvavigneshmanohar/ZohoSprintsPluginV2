@@ -4,18 +4,25 @@ import io.jenkins.plugins.model.Sprint;
 
 public abstract class SprintsPostBuilder extends PostBuild {
 
-    public SprintsPostBuilder(String prefix, String name, String description, String scrummaster, String users,
-            String duration, String startdate, String enddate) {
-        super(Sprint.getInstance(prefix).setName(name)
+    public SprintsPostBuilder(String projectNumber, String sprintNumber, String name, String description,
+            String scrummaster, String users,
+            String duration, String startdate, String enddate, String customFields) {
+        super(Sprint.getInstance(projectNumber, sprintNumber)
+                .setName(name)
                 .setDuration(duration)
                 .setStartdate(startdate)
                 .setEnddate(enddate)
                 .setScrummaster(scrummaster)
-                .setUsers(users));
+                .setUsers(users)
+                .setCustomFields(customFields));
     }
 
-    public SprintsPostBuilder(String prefix, String note) {
-        super(Sprint.getInstance(prefix).setNote(note));
+    public SprintsPostBuilder(String projectNumber, String sprintNumber, String note) {
+        super(Sprint.getInstance(projectNumber, sprintNumber).setNote(note));
+    }
+
+    public SprintsPostBuilder(String projectNumber, String sprintNumber) {
+        super(Sprint.getInstance(projectNumber, sprintNumber));
     }
 
     public Sprint getForm() {

@@ -4,9 +4,11 @@ import io.jenkins.plugins.model.Release;
 
 public abstract class ReleasePostBuilder extends PostBuild {
 
-    public ReleasePostBuilder(String prefix, String name, String owners, String goal, String stage, String startdate,
-            String enddate, String customFields) {
-        super(Release.getInstance(prefix).setName(name)
+    public ReleasePostBuilder(String projectNumber, String releaseNumber, String name, String owners, String goal,
+            String stage, String startdate, String enddate, String customFields) {
+        super(Release.getInstance(projectNumber)
+                .setRelaseNumber(releaseNumber)
+                .setName(name)
                 .setOwners(owners)
                 .setGoal(goal)
                 .setStage(stage)
@@ -15,8 +17,8 @@ public abstract class ReleasePostBuilder extends PostBuild {
                 .setCustomFields(customFields));
     }
 
-    public ReleasePostBuilder(String prefix, String note) {
-        super(Release.getInstance(prefix).setNote(note));
+    public ReleasePostBuilder(String projectNumber, String releaseNumber, String note) {
+        super(Release.getInstance(projectNumber).setRelaseNumber(releaseNumber).setNote(note));
     }
 
     public Release getForm() {

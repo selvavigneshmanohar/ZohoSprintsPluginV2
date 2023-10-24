@@ -16,8 +16,8 @@ import io.jenkins.plugins.exception.ZSprintsException;
 
 public class StartSprint extends SprintsPipelineStep {
     @DataBoundConstructor
-    public StartSprint(String prefix) {
-        super(prefix);
+    public StartSprint(String projectNumber, String sprintNumber) {
+        super(projectNumber, sprintNumber);
     }
 
     @Override

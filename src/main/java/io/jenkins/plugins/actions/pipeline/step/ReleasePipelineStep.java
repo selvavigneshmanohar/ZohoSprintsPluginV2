@@ -4,9 +4,11 @@ import io.jenkins.plugins.model.Release;
 
 public abstract class ReleasePipelineStep extends PipelineStep {
 
-    public ReleasePipelineStep(String prefix, String name, String goal, String stage, String owners, String startdate,
-            String enddate, String customFields) {
-        super(Release.getInstance(prefix).setName(name)
+    public ReleasePipelineStep(String projectNumber, String releaseNumber, String name, String owners, String goal,
+            String stage, String startdate, String enddate, String customFields) {
+        super(Release.getInstance(projectNumber)
+                .setRelaseNumber(releaseNumber)
+                .setName(name)
                 .setOwners(owners)
                 .setGoal(goal)
                 .setStage(stage)
@@ -15,8 +17,8 @@ public abstract class ReleasePipelineStep extends PipelineStep {
                 .setCustomFields(customFields));
     }
 
-    public ReleasePipelineStep(String prefix, String note) {
-        super(Release.getInstance(prefix).setNote(note));
+    public ReleasePipelineStep(String projectNumber, String releaseNumber, String note) {
+        super(Release.getInstance(projectNumber).setRelaseNumber(releaseNumber).setNote(note));
     }
 
     public Release getForm() {

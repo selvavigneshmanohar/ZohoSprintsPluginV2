@@ -4,13 +4,17 @@ import io.jenkins.plugins.model.Item;
 
 public abstract class ItemPipelineStep extends PipelineStep {
 
-    public ItemPipelineStep(String prefix, String note) {
-        super(Item.getInstance(prefix).setNote(note));
+    public ItemPipelineStep(String projectNumber, String sprintNumber, String itemNumber, String note) {
+        super(Item.getInstance(projectNumber, sprintNumber).setItemNumber(itemNumber).setNote(note));
     }
 
-    public ItemPipelineStep(String prefix, String name, String description, String status, String type, String priority,
+    public ItemPipelineStep(String projectNumber, String sprintNumber, String itemNumber, String name,
+            String description, String status,
+            String type, String priority,
             String duration, String assignee, String startdate, String enddate, String customFields) {
-        super(Item.getInstance(prefix).setName(name)
+        super(Item.getInstance(projectNumber, sprintNumber)
+                .setItemNumber(itemNumber)
+                .setName(name)
                 .setDescription(description)
                 .setStatus(status)
                 .setType(type)

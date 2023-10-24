@@ -16,9 +16,9 @@ import io.jenkins.plugins.exception.ZSprintsException;
 
 public class UpdateSprint extends SprintsPipelineStep {
     @DataBoundConstructor
-    public UpdateSprint(String prefix, String name, String description, String duration, String startdate,
-            String enddate) {
-        super(prefix, name, description, null, null, duration, startdate, enddate);
+    public UpdateSprint(String projectNumber, String sprintNumber, String name, String description, String duration,
+            String startdate, String enddate, String customFields) {
+        super(projectNumber, sprintNumber, name, description, null, null, duration, startdate, enddate, customFields);
     }
 
     @Override

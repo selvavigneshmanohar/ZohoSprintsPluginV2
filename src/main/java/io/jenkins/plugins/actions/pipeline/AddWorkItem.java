@@ -20,9 +20,12 @@ import io.jenkins.plugins.exception.ZSprintsException;
 public class AddWorkItem extends ItemPipelineStep {
 
     @DataBoundConstructor
-    public AddWorkItem(String prefix, String name, String description, String status, String type, String priority,
-            String duration, String startdate, String enddate, String customFields, String assignee) {
-        super(prefix, name, description, status, type, priority, duration, assignee, startdate, enddate, customFields);
+    public AddWorkItem(String projectNumber, String sprintNumber, String name,
+            String description, String status, String type, String priority,
+            String duration, String assignee, String startdate, String enddate, String customFields) {
+        super(projectNumber, sprintNumber, null, name, description, status, type, priority, duration, assignee,
+                startdate, enddate,
+                customFields);
     }
 
     @Override

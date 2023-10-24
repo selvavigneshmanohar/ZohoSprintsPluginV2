@@ -75,12 +75,17 @@ public class Release extends BaseModel {
         return this;
     }
 
-    private Release(String prefix) {
-        super(prefix);
+    public Release setRelaseNumber(String relaseNumber) {
+        this.releaseNumber = relaseNumber;
+        return this;
     }
 
-    public static Release getInstance(String prefix) {
-        return new Release(prefix);
+    private Release(String projectNumber) {
+        super(projectNumber);
+    }
+
+    public static Release getInstance(String projectNumber) {
+        return new Release(projectNumber);
     }
 
 }

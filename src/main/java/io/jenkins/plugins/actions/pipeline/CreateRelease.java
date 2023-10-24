@@ -19,10 +19,9 @@ import io.jenkins.plugins.model.Release;
 public class CreateRelease extends ReleasePipelineStep {
 
     @DataBoundConstructor
-    public CreateRelease(String prefix, String name, String goal, String stage, String owners,
-            String startdate,
-            String enddate, String customFields) {
-        super(prefix, name, owners, goal, stage, startdate, enddate, customFields);
+    public CreateRelease(String projectNumber, String name, String goal, String stage, String owners,
+            String startdate, String enddate, String customFields) {
+        super(projectNumber, null, name, owners, goal, stage, startdate, enddate, customFields);
     }
 
     @Override

@@ -16,8 +16,8 @@ import io.jenkins.plugins.exception.ZSprintsException;
 
 public class AddSprintComment extends SprintsPipelineStep {
     @DataBoundConstructor
-    public AddSprintComment(String prefix, String note) {
-        super(prefix, note);
+    public AddSprintComment(String projectNumber, String sprintNumber, String note) {
+        super(projectNumber, sprintNumber, note);
     }
 
     @Override

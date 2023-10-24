@@ -20,9 +20,9 @@ import io.jenkins.plugins.exception.ZSprintsException;
 public class CreateSprint extends SprintsPipelineStep {
 
     @DataBoundConstructor
-    public CreateSprint(String prefix, String name, String description, String scrummaster, String users,
-            String duration, String startdate, String enddate) {
-        super(prefix, name, description, scrummaster, users, duration, startdate, enddate);
+    public CreateSprint(String projectNumber, String name, String description, String scrummaster, String users,
+            String duration, String startdate, String enddate, String customFields) {
+        super(projectNumber, null, name, description, scrummaster, users, duration, startdate, enddate, customFields);
     }
 
     @Override

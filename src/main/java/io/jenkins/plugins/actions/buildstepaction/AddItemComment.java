@@ -11,8 +11,8 @@ import io.jenkins.plugins.api.WorkItemAPI;
 public class AddItemComment extends ItemStepBuilder {
 
     @DataBoundConstructor
-    public AddItemComment(String prefix, String note) {
-        super(prefix, note);
+    public AddItemComment(String projectNumber, String sprintNumber, String itemNumber, String note) {
+        super(projectNumber, sprintNumber, itemNumber, note);
     }
 
     @Override

@@ -15,8 +15,20 @@ public class PostBuildDescriptor extends BuildStepDescriptor<Publisher> {
         return true;
     }
 
-    public FormValidation doCheckPrefix(@QueryParameter final String prefix) {
-        return Util.validateRequired(prefix);
+    public FormValidation doCheckProjectNumber(@QueryParameter final String projectNumber) {
+        return Util.validateRequired(projectNumber);
+    }
+
+    public FormValidation doCheckSprintNumber(@QueryParameter final String sprintNumber) {
+        return Util.validateRequired(sprintNumber);
+    }
+
+    public FormValidation doCheckItemNumber(@QueryParameter final String itemNumber) {
+        return Util.validateRequired(itemNumber);
+    }
+
+    public FormValidation doCheckReleaseNumber(@QueryParameter final String releaseNumber) {
+        return Util.validateRequired(releaseNumber);
     }
 
     public FormValidation doCheckNote(@QueryParameter final String note) {

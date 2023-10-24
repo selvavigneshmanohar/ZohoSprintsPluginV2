@@ -31,12 +31,7 @@ public class SprintAPI {
 
     public String create(Sprint sprint) throws Exception {
 
-        ZohoClient client = new ZohoClient(CREATE_SPRINT_API, ZohoClient.METHOD_POST, sprint.getProjectNumber())
-                .addParameter("name", sprint.getName())
-                .addParameter("description", sprint.getDescription())
-                .addParameter("duration", sprint.getDuration())
-                .addParameter("startdate", sprint.getStartdate())
-                .addParameter("enddate", sprint.getEnddate());
+        ZohoClient client = new ZohoClient(CREATE_SPRINT_API, ZohoClient.METHOD_POST, sprint.getProjectNumber());
         JSONArray scrumMasterUserIds = getUsers(sprint.getScrummaster(), sprint.getProjectNumber());
         if (!scrumMasterUserIds.isEmpty()) {
             client.addParameter("scrummaster", "" + scrumMasterUserIds.get(0));
@@ -45,27 +40,26 @@ public class SprintAPI {
         if (!sprintUsers.isEmpty()) {
             client.addParameter("users", sprintUsers);
         }
-        String response = client.execute();
-        String message = new JSONObject(response).optString("message", null);
-        if (message == null) {
-            return "Sprint added successfully";
-        }
-        throw new ZSprintsException(message);
+        return addorUpdate(client, sprint, "Sprint added successfully");
     }
 
     public String update(Sprint sprint) throws Exception {
         ZohoClient client = new ZohoClient(UPDATE_SPRINTS_API, ZohoClient.METHOD_POST, sprint.getProjectNumber(),
                 sprint.getSprintNumber());
-        String response = client.addParameter("name", sprint.getName())
+        return addorUpdate(client, sprint, "Sprint updated successfully");
+    }
+
+    private String addorUpdate(ZohoClient client, Sprint sprint, String successMessage) throws Exception {
+        client.addParameter("name", sprint.getName())
                 .addParameter("description", sprint.getDescription())
                 .addParameter("duration", sprint.getDuration())
                 .addParameter("startdate", sprint.getStartdate())
-                .addParameter("enddate", sprint.getEnddate())
-                .execute();
-
+                .addParameter("enddate", sprint.getEnddate());
+        Util.setCustomFields(sprint.getCustomFields(), client);
+        String response = client.execute();
         String message = new JSONObject(response).optString("message", null);
         if (message == null) {
-            return "Sprint updated successfully";
+            return successMessage;
         }
         throw new ZSprintsException(message);
     }

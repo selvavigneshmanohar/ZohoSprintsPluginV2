@@ -4,13 +4,17 @@ import io.jenkins.plugins.model.Item;
 
 public abstract class ItemPostBuilder extends PostBuild {
 
-    public ItemPostBuilder(String prefix, String note) {
-        super(Item.getInstance(prefix).setNote(note));
+    public ItemPostBuilder(String projectNumber, String sprintNumber, String itemNumber, String note) {
+        super(Item.getInstance(projectNumber, sprintNumber).setItemNumber(itemNumber).setNote(note));
     }
 
-    public ItemPostBuilder(String prefix, String name, String description, String status, String type, String priority,
+    public ItemPostBuilder(String projectNumber, String sprintNumber, String itemNumber, String name,
+            String description, String status,
+            String type, String priority,
             String duration, String assignee, String startdate, String enddate, String customFields) {
-        super(Item.getInstance(prefix).setName(name)
+        super(Item.getInstance(projectNumber, sprintNumber)
+                .setItemNumber(itemNumber)
+                .setName(name)
                 .setDescription(description)
                 .setStatus(status)
                 .setType(type)

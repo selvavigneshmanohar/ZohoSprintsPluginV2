@@ -18,8 +18,8 @@ import io.jenkins.plugins.model.Sprint;
 
 public class CompleteSprint extends PipelineStep {
     @DataBoundConstructor
-    public CompleteSprint(String prefix) {
-        super(Sprint.getInstance(prefix));
+    public CompleteSprint(String projectNumber, String sprintNumber) {
+        super(Sprint.getInstance(projectNumber, sprintNumber));
     }
 
     public Sprint getForm() {

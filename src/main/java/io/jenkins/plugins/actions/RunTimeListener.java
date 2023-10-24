@@ -26,7 +26,8 @@ public class RunTimeListener extends RunListener<Run<?, ?>> {
 
         Boolean isIssueCreateConfigured = envVars.containsKey("ZSPRINTS_ISSUE_BUILD_ENVIRONMENT_AVAILABLE");
         if (isIssueCreateConfigured && Result.FAILURE.equals(run.getResult())) {
-            String prefix = envVars.get("ZSPRINTS_ISSUE_PREFIX");
+            String projectNumber = envVars.get("ZSPRINTS_ISSUE_PROJECT_NUMBER");
+            String sprintNumber = envVars.get("ZSPRINTS_ISSUE_SPRINT_NUMBER");
             String name = envVars.get("ZSPRINTS_ISSUE_NAME");
             String description = envVars.get("ZSPRINTS_ISSUE_DESCRIPTION");
             String assignee = envVars.get("ZSPRINTS_ISSUE_ASSIGNEE");
@@ -37,7 +38,7 @@ public class RunTimeListener extends RunListener<Run<?, ?>> {
             String startdate = envVars.get("ZSPRINTS_ISSUE_STARTDATE");
             String enddate = envVars.get("ZSPRINTS_ISSUE_ENDDATE");
             String customfield = envVars.get("ZSPRINTS_ISSUE_CUSTOMFIELD");
-            Item item = Item.getInstance(prefix).setName(name)
+            Item item = Item.getInstance(projectNumber, sprintNumber).setName(name)
                     .setDescription(description)
                     .setStatus(status)
                     .setType(type)

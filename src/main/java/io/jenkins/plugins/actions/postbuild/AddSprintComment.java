@@ -11,8 +11,8 @@ import io.jenkins.plugins.api.SprintAPI;
 public class AddSprintComment extends SprintsPostBuilder {
 
     @DataBoundConstructor
-    public AddSprintComment(String prefix, String note) {
-        super(prefix, note);
+    public AddSprintComment(String projectNumber, String sprintNumber, String note) {
+        super(projectNumber, sprintNumber, note);
     }
 
     @Override

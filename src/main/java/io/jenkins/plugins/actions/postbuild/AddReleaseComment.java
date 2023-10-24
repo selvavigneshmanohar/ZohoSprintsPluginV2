@@ -11,8 +11,8 @@ import io.jenkins.plugins.api.ReleaseAPI;
 public class AddReleaseComment extends ReleasePostBuilder {
 
     @DataBoundConstructor
-    public AddReleaseComment(String prefix, String note) {
-        super(prefix, note);
+    public AddReleaseComment(String projectNumber, String releaseNumber, String note) {
+        super(projectNumber, releaseNumber, note);
     }
 
     @Override

@@ -10,9 +10,10 @@ import io.jenkins.plugins.api.ReleaseAPI;
 
 public class UpdateRelease extends ReleasePostBuilder {
     @DataBoundConstructor
-    public UpdateRelease(String prefix, String name, String goal, String stage, String startdate,
+    public UpdateRelease(String projectNumber, String releaseNumber, String name, String goal, String stage,
+            String startdate,
             String enddate, String customFields) {
-        super(prefix, name, null, goal, stage, startdate, enddate, customFields);
+        super(projectNumber, releaseNumber, name, null, goal, stage, startdate, enddate, customFields);
     }
 
     @Override

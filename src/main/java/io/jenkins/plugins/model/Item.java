@@ -4,12 +4,18 @@ public class Item extends BaseModel {
     private String name, description, status, type, priority, duration, startdate, enddate, customFields,
             assignee, note;
 
-    private Item(String prefix) {
-        super(prefix);
+    private Item(String projectNumber, String sprintNumber) {
+        super(projectNumber);
+        this.sprintNumber = sprintNumber;
     }
 
-    public static Item getInstance(String prefix) {
-        return new Item(prefix);
+    public static Item getInstance(String projectNumber, String sprintNumber) {
+        return new Item(projectNumber, sprintNumber);
+    }
+
+    public Item setItemNumber(String itemNumber) {
+        this.itemNumber = itemNumber;
+        return this;
     }
 
     public Item setName(String name) {

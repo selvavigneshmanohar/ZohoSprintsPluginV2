@@ -4,16 +4,16 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 import hudson.Extension;
 import io.jenkins.plugins.Messages;
-import io.jenkins.plugins.actions.postbuild.builder.PostBuild;
+import io.jenkins.plugins.actions.postbuild.builder.SprintsPostBuilder;
 import io.jenkins.plugins.actions.postbuild.descriptor.PostBuildDescriptor;
 import io.jenkins.plugins.api.SprintAPI;
 import io.jenkins.plugins.model.Sprint;
 
-public class StartSprint extends PostBuild {
+public class StartSprint extends SprintsPostBuilder {
 
     @DataBoundConstructor
-    public StartSprint(String prefix) {
-        super(Sprint.getInstance(prefix));
+    public StartSprint(String projectNumber, String sprintNumber) {
+        super(projectNumber, sprintNumber);
     }
 
     public Sprint getForm() {

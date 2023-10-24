@@ -17,8 +17,8 @@ import io.jenkins.plugins.exception.ZSprintsException;
 public class AddReleaseComment extends ReleasePipelineStep {
 
     @DataBoundConstructor
-    public AddReleaseComment(String prefix, String note) {
-        super(prefix, note);
+    public AddReleaseComment(String projectNumber, String releaseNumber, String note) {
+        super(projectNumber, releaseNumber, note);
     }
 
     @Override

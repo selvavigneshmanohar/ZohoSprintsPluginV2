@@ -11,9 +11,11 @@ import io.jenkins.plugins.api.WorkItemAPI;
 public class UpdateWorkItem extends ItemStepBuilder {
 
     @DataBoundConstructor
-    public UpdateWorkItem(String prefix, String name, String description, String status, String type, String priority,
+    public UpdateWorkItem(String projectNumber, String sprintNumber, String itemNumber, String name, String description,
+            String status, String type, String priority,
             String duration, String startdate, String enddate, String customFields) {
-        super(prefix, name, description, status, type, priority, duration, null, startdate, enddate, customFields);
+        super(projectNumber, sprintNumber, itemNumber, name, description, status, type, priority, duration, null,
+                startdate, enddate, customFields);
     }
 
     @Override

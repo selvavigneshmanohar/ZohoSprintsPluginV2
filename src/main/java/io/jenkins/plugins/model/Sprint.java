@@ -1,7 +1,7 @@
 package io.jenkins.plugins.model;
 
 public class Sprint extends BaseModel {
-    private String name, description, startdate, enddate, duration, users, note, scrummaster;
+    private String name, description, startdate, enddate, duration, users, note, scrummaster, customFields;
 
     public String getScrummaster() {
         return scrummaster;
@@ -47,6 +47,10 @@ public class Sprint extends BaseModel {
         return getValue(enddate);
     }
 
+    public String getCustomFields() {
+        return getValue(customFields);
+    }
+
     public Sprint setEnddate(String enddate) {
         this.enddate = enddate;
         return this;
@@ -79,12 +83,22 @@ public class Sprint extends BaseModel {
         return this;
     }
 
-    private Sprint(String prefix) {
-        super(prefix);
+    private Sprint setSprintNumber(String sprintNumber) {
+        this.sprintNumber = sprintNumber;
+        return this;
     }
 
-    public static Sprint getInstance(String prefix) {
-        return new Sprint(prefix);
+    public Sprint setCustomFields(String customFields) {
+        this.customFields = customFields;
+        return this;
+    }
+
+    private Sprint(String projectNumber) {
+        super(projectNumber);
+    }
+
+    public static Sprint getInstance(String projectNumber, String sprintNumber) {
+        return new Sprint(projectNumber).setSprintNumber(sprintNumber);
     }
 
 }

@@ -16,9 +16,9 @@ import io.jenkins.plugins.exception.ZSprintsException;
 
 public class UpdateRelease extends ReleasePipelineStep {
     @DataBoundConstructor
-    public UpdateRelease(String prefix, String name, String goal, String stage, String startdate,
-            String enddate, String customFields) {
-        super(prefix, name, null, goal, stage, startdate, enddate, customFields);
+    public UpdateRelease(String projectNumber, String releaseNumber, String name, String goal, String stage,
+            String startdate, String enddate, String customFields) {
+        super(projectNumber, releaseNumber, name, null, goal, stage, startdate, enddate, customFields);
     }
 
     @Override
